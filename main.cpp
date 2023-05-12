@@ -10,6 +10,14 @@ using namespace std;
 
 string path; // the path of the Input File
 
+// adjust the display of the program
+void gotoxy(int x, int y) {
+	COORD c;
+	c.X = x;
+	c.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
 // check if the file is CSV file or not
 bool isCSVFile(char* filename) 
 {
@@ -31,11 +39,20 @@ bool isCSVFile(char* filename)
 }
 
 void get_file()
-{
+{   
+    system("cls"); 
+	gotoxy(10, 5);
+	cout << "<< Uploud a Comma Separated File (.CSV) >>";
+	gotoxy(20, 7);
+	cout << "The file should represent matches' statistics";
+    gotoxy(25, 8);
+    cout << "of every game during the rounds of the English Premier League season";
+
     // Initialize variables for file selection
     OPENFILENAME ofn;           // common dialog box structure
     char szFile[260];           // buffer for file name
     HWND hwnd = NULL;           // owner window
+    szFile[0] = '\0';
 
     // Initialize OPENFILENAME struct
     ZeroMemory(&ofn, sizeof(ofn));                      // Clear memory for struct
@@ -50,40 +67,43 @@ void get_file()
     ofn.lpstrInitialDir = NULL;                         // Set initial directory (not used in this case)
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;  // Set options for file selection
 
-    cout << "**************** press 1 to browse ****************\n\n\n";
+    gotoxy(12, 12);
+    cout << "Press 'u' to browse: ";
 
     while (true)
     {
-        // Check if the '1' key is pressed
-        if (_getch() == '1') 
+        // Check if the key is pressed
+        if (_getch() == 'u') 
         {
             // Display the Open dialog box.
             if (GetOpenFileName(&ofn)==TRUE) 
             {
-                // Do something with the selected file
-                cout << "\n**********************************\n";
-                cout << "Selected file: " << szFile << endl;
-                cout << "**********************************\n\n";
-                if (isCSVFile(szFile))
-                {
-                    cout << "\n\t\t\t################# Your File is CSV File #################\n\n";
-                    return;
+                if (isCSVFile(szFile)) {
+                    // to do 
+                }
+                else {
+                    gotoxy(20, 14); 
+                    cout << "The file should be a .CSV file";
+                    gotoxy(12, 16); 
+                    cout << "Press 'u' to browse: ";
                 }
             }
         }
-        else cout << "To browse, please press 1\n";
+        else {
+            gotoxy(12, 12); 
+            cout << "Press 'u' to browse: ";
+        }
     }
 }
 
 int main() 
 {
-    printf("\t\t\t#######################################################\n");
-    printf("\t\t\t\t\tChoose a CSV File to Upload\n");
-    printf("\t\t\t#######################################################\n\n\n");
-
+    system("cls"); 
+    gotoxy(20, 10);
+	cout << "<< Standify - Premier League's Standing >>";
+	gotoxy(40, 15);
+	cout << "Press any key to continue";
+	_getch();
     get_file();
-    cout << path << '\n';
-    
-    char c = getchar();
     return 0;
 }
