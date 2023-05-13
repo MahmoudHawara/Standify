@@ -44,6 +44,8 @@ void gotoxy(int x, int y) {
 class Team
 {
     // private:
+    public: 
+
         string Name;                // The name of the team
         int Id;                     // The id of the team
         int matchesPlayed;          // Number of matches played by the team
@@ -54,7 +56,6 @@ class Team
         int goalsFor;               // Number of goals scored by the team
         int goalsAgainst;           // Number of goals conceded by the team
 
-    public: 
         // Constructor to initialize the object
         Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0)
         {
@@ -105,7 +106,8 @@ vector<Team>team;
 // This class represents a match between two teams
 class Match
 {
-    private:
+    // private 
+    public:
         int homeTeamId;         // The id of the home team
         int awayTeamId;         // The id of the away team
         int round;              // The round number of the match
@@ -116,7 +118,6 @@ class Match
         int goalsForAway;       // The number of goals scored by the away team
         char winner;            // d = Draw, h = Home, a = Away
 
-    public:
         // Constructor to initialize the object
         Match(int hId, int aId, int r, int d, int m, int y, int gh, int ga, char w)
         {
@@ -177,7 +178,7 @@ class League
     private:
         bool isTeamsSorted;                     // flag to check if teams are sorted
         vector<vector<Match>> teamSchedule;     // adjacency list of the graph
-
+        vector<bool>vis;
     public: 
         // Constructor to initialize the object
         League()
@@ -189,6 +190,7 @@ class League
         // Method to reset all the teams
         void resetTeams()
         {
+            vis.resize(team.size(),0);
             for (int i = 0; i < team.size(); i++)
             {
                 team[i].reset();
@@ -235,11 +237,43 @@ class League
         {
             // TODO: Implementation pending  =>  samar
         }
-
+        bool date_compare(int day1,int day2,int year1,int year2,int mon1,int mon2)
+        {
+            if(year1>year2)return 1;
+            if(year1==year2&&mon1>mon2)return 1;
+            if(year1==year2&&mon1==mon2&&day1>day2)return 1;
+            return 0;
+        }
         // Method to perform DFS on the dates
-        void DFS_Date()
+        void DFS_Date(int currentTeamId,int day,int year,int month)
         {
             // TODO: Implementation pending  =>  mod
+            if(vis[currentTeamId])return;
+            vis[currentTeamId]=1;
+            for(auto i:this->teamSchedule[currentTeamId])
+            {
+                if(date_compare(i.day,day,i.year,year,i.month,month))return;
+                team[currentTeamId].matchesPlayed++;
+                team[currentTeamId].goalsFor+=i.goalsForHome;
+                team[currentTeamId].goalsAgainst+=i.goalsForAway;
+                team[i.awayTeamId].matchesPlayed++;
+                team[i.awayTeamId].goalsAgainst+=i.goalsForHome;
+                team[i.awayTeamId].goalsFor+=i.goalsForAway;
+                if(i.winner=='H')
+                {
+                team[currentTeamId].points+=3;
+                }
+                else if(i.winner=='A')
+                {
+                team[i.awayTeamId].points+=3;
+                }
+                else
+                {
+                    team[i.awayTeamId].points++;
+                    team[currentTeamId].points++;
+                }
+                DFS_Date(i.awayTeamId,day,year,month);
+            }
         }
 
         // Method to sort the matches based on rounds
@@ -523,7 +557,6 @@ void openFileDialogue()
     char szFile[260];           // buffer for file name
     HWND hwnd = NULL;           // owner window
     szFile[0] = '\0';
-
     // Initialize OPENFILENAME struct
     ZeroMemory(&ofn, sizeof(ofn));                      // Clear memory for struct
     ofn.lStructSize = sizeof(ofn);                      // Set size of struct
