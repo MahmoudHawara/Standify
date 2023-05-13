@@ -6,13 +6,12 @@
 #include <algorithm>
 #include <windows.h>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
 using namespace std;
 
-int numberOfTeams;
-string path; // the path of the Input File
 map<string, int>nameToId;
 
 // this function to clear the console screen
@@ -34,141 +33,10 @@ void gotoxy(int x, int y) {
 	c.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
-
-// check if the file is CSV file or not
-bool isCSVFile(char* filename) 
-{
-    // Get the position of the last dot in the filename
-    size_t len = strlen(filename);
-    size_t dotpos = len;
-    for (size_t i = 0; i < len; i++) 
-    {
-        if (filename[i] == '.')dotpos = i;
-    }
-
-    // Check if the dot was found and if the extension is ".csv"
-    if (dotpos != len && strcmp(&filename[dotpos], ".csv") == 0) 
-    {
-        path = string(filename); // if The File is already .csv then make path = the path of this file
-        return true;
-    } 
-    else return false;
-}
-
-void get_file()
-{   
-    system("cls"); 
-	gotoxy(10, 5);
-	cout << "<< Uploud a Comma Separated File (.CSV) >>";
-	gotoxy(20, 7);
-	cout << "The file should represent matches' statistics";
-    gotoxy(25, 8);
-    cout << "of every game during the rounds of the English Premier League season";
-
-    // Initialize variables for file selection
-    OPENFILENAME ofn;           // common dialog box structure
-    char szFile[260];           // buffer for file name
-    HWND hwnd = NULL;           // owner window
-    szFile[0] = '\0';
-
-    // Initialize OPENFILENAME struct
-    ZeroMemory(&ofn, sizeof(ofn));                      // Clear memory for struct
-    ofn.lStructSize = sizeof(ofn);                      // Set size of struct
-    ofn.hwndOwner = hwnd;                               // Set owner window (null in this case)
-    ofn.lpstrFile = szFile;                             // Set buffer for file name
-    ofn.nMaxFile = sizeof(szFile);                      // Set maximum length of file name
-    ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";        // Set filter for file types
-    ofn.nFilterIndex = 1;                               // Set default filter index
-    ofn.lpstrFileTitle = NULL;                          // Set buffer for file title (not used in this case)
-    ofn.nMaxFileTitle = 0;                              // Set maximum length of file title (not used in this case)
-    ofn.lpstrInitialDir = NULL;                         // Set initial directory (not used in this case)
-    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;  // Set options for file selection
-
-    gotoxy(12, 12);
-    cout << "Press 'u' to browse: ";
-
-    while (true)
-    {
-        // Check if the key is pressed
-        if (_getch() == 'u') 
-        {
-            // Display the Open dialog box.
-            if (GetOpenFileName(&ofn)==TRUE) 
-            {
-                if (isCSVFile(szFile)) {
-                    // return and go to Take That File
-                    return;
-                }
-                else {
-                    gotoxy(20, 14); 
-                    cout << "The file should be a .CSV file";
-                    gotoxy(12, 16); 
-                    cout << "Press 'u' to browse: ";
-                }
-            }
-        }
-        else {
-            gotoxy(12, 12); 
-            cout << "Press 'u' to browse: ";
-        }
-    }
-}
-
-// This class represents a match between two teams
-class Match
-{
-    private:
-        int homeTeamId;         // The id of the home team
-        int awayTeamId;         // The id of the away team
-        int round;              // The round number of the match
-        int day;                // The day of the match
-        int month;              // The month of the match
-        int year;               // The year of the match
-        int goalsForHome;       // The number of goals scored by the home team
-        int goalsForAway;       // The number of goals scored by the away team
-        char winner;            // d = Draw, h = Home, a = Away
-
-    public:
-        // Constructor to initialize the object
-        Match(int r, int d, int m, int y, int gh, int ga, char w)
-        {
-            this->round         = r;
-            this->day           = d;
-            this->month         = m;
-            this->year          = y;
-            this->goalsForHome  = gh;
-            this->goalsForAway  = ga;
-            this->winner        = w;
-        }
-
-        // Overloaded operator < to sort matches based on their round number in ascending order
-        bool operator<(const Match& other)
-        {
-            return this->round < other.round;
-        }
-
-        // Static method to compare two matches based on their date
-        static bool compare(const Match& a, const Match& b) 
-        {
-            if (a.year != b.year)
-            {
-                return a.year < b.year;
-            }
-            else if (a.month != b.month)
-            {
-                return a.month < b.month;
-            }
-            else
-            {
-                return a.day < b.day;
-            }
-        }
-};
-
 // This class represents a team in the league
 class Team
 {
-    private:
+    // private:
         string Name;                // The name of the team
         int Id;                     // The id of the team
         int matchesPlayed;          // Number of matches played by the team
@@ -206,6 +74,12 @@ class Team
             this->goalsAgainst   = 0;
         }
 
+        // getter method to get the name of the team
+        string getName()
+        {
+            return this->Name;
+        }
+
         // Method to print the details of the team
         void print()
         {
@@ -220,6 +94,76 @@ class Team
 };
 
 vector<Team>team;
+
+// This class represents a match between two teams
+class Match
+{
+    private:
+        int homeTeamId;         // The id of the home team
+        int awayTeamId;         // The id of the away team
+        int round;              // The round number of the match
+        int day;                // The day of the match
+        int month;              // The month of the match
+        int year;               // The year of the match
+        int goalsForHome;       // The number of goals scored by the home team
+        int goalsForAway;       // The number of goals scored by the away team
+        char winner;            // d = Draw, h = Home, a = Away
+
+    public:
+        // Constructor to initialize the object
+        Match(int hId, int aId, int r, int d, int m, int y, int gh, int ga, char w)
+        {
+            this->homeTeamId    = hId;
+            this->awayTeamId    = aId;
+            this->round         = r;
+            this->day           = d;
+            this->month         = m;
+            this->year          = y;
+            this->goalsForHome  = gh;
+            this->goalsForAway  = ga;
+            this->winner        = w;
+        }
+
+        // Overloaded operator < to sort matches based on their round number in ascending order
+        bool operator<(const Match& other)
+        {
+            return this->round < other.round;
+        }
+
+        // Static method to compare two matches based on their date
+        static bool compare(const Match& a, const Match& b) 
+        {
+            if (a.year != b.year)
+            {
+                return a.year < b.year;
+            }
+            else if (a.month != b.month)
+            {
+                return a.month < b.month;
+            }
+            else
+            {
+                return a.day < b.day;
+            }
+        }
+
+        // getter to get away team id
+        int getAwayId()
+        {
+            return this->awayTeamId;
+        }
+
+        void print()
+        {
+            cout << this->round << ", ";
+            cout << team[this->homeTeamId].getName() << ", ";
+            cout << team[this->awayTeamId].getName() << ", ";
+            cout << this->goalsForHome << ", ";
+            cout << this->goalsForAway << ", ";
+            cout << this->winner << '\n';
+        }
+};
+
 
 // This class represents a league with teams and their matches schedule
 class League
@@ -249,7 +193,7 @@ class League
         // Parameters:
         // homeId - id of the home team
         // awayId - id of the away team
-        // match - Match object representing the match
+        // match  - Match object representing the match
         void addMatch(int homeId, int awayId, Match match)
         {
             // Check if both teams exist in the schedule
@@ -271,6 +215,13 @@ class League
 
             // Mark that the teams are not sorted
             isTeamsSorted = false;
+        }
+
+        // Method to add a new team to the team schedule.
+        void addTeam()
+        {
+            // The push_back() function adds an empty vector to the end of the teamSchedule vector.
+            teamSchedule.push_back({});
         }
 
         // Method to perform DFS on the rounds
@@ -319,6 +270,18 @@ class League
             isTeamsSorted = true;
         }
 
+        void print()
+        {
+            for (int i = 0; i < teamSchedule.size(); i++)
+            {
+                for (int j = 0; j < teamSchedule[i].size(); j++)
+                {
+                    cout << team[i].getName() << ' ' << team[this->teamSchedule[i][j].getAwayId()].getName() << '\n';
+                }
+                cout << "\n\n";
+            }
+        }
+
         // Method to print the standing of the teams
         void printStanding()
         {
@@ -331,7 +294,269 @@ class League
                 team[i].print();
             }
         }
+
+        // This function resets the team schedule by clearing all game assignments for each team
+        void reset()
+        {
+            // Iterate over each element in the teamSchedule vector
+            for (int i = 0; i < this->teamSchedule.size(); i++)
+            {
+                // Clear the game assignments for the current team by calling the clear() method of the corresponding vector object
+                this->teamSchedule[i].clear();
+            }
+        }
 };
+
+League league_rounds;
+League league_date;
+
+// check if the file is CSV file or not
+bool isCSVFile(char* filename) 
+{
+    // Get the position of the last dot in the filename
+    size_t len = strlen(filename);
+    size_t dotpos = len;
+    for (size_t i = 0; i < len; i++) 
+    {
+        if (filename[i] == '.')dotpos = i;
+    }
+
+    // Check if the dot was found and if the extension is ".csv"
+    if (dotpos != len && strcmp(&filename[dotpos], ".csv") == 0)return true;
+    else return false;
+}
+
+// check if the CSV File is good or not
+bool isGoodCSVFile(string filePath)
+{
+    // TODO: Implementation pending  =>  Sherif
+    return true;
+}
+
+// This function creates a new team with the given name and adds it to the league
+void createNewTeam(string teamName)
+{
+    // First, we get the current number of teams, which will be the new team's ID
+    int teamId = (int)team.size();
+    
+    // Next, we add a mapping from the team name to the team ID in the nameToId map
+    nameToId[teamName] = teamId;
+    
+    // Then, we create a new Team object with the given name and ID, and add it to the team vector
+    team.push_back(Team(teamName, teamId));
+    
+    // Finally, we inform the league that a new team has been added
+    league_rounds.addTeam();
+}
+
+// This function converts a string representation of a number to a long long integer
+long long strToInt(string number)
+{
+    // We start with a value of 0
+    long long ret = 0;
+    
+    // For each character in the string, we multiply our current value by 10 and add the digit
+    for (int i = 0; number[i]; i++)
+    {
+        ret *= 10;
+        ret += (number[i] - '0');
+    }
+    
+    // Once we've processed all the digits, we return the final value
+    return ret;
+}
+
+// This function reads league match data from a file specified by the filePath parameter
+void implementTheLeagueFromFile(string filePath)
+{
+    // Open the input file
+    ifstream inputFile(filePath);
+    if (!inputFile.is_open())
+    {
+        cerr << "Error: Unable to open file!\n";
+        assert(0); // Quit the program if unable to open the file
+    }
+
+    string line;
+    // Read the first line of the file (header) and discard it
+    getline(inputFile, line);
+
+    // Read the rest of the lines in the file and extract match data
+    while (getline(inputFile, line)) 
+    {
+        int i = 0, homeTeamId, awayTeamId, round, day, month, year, goalsForHome, goalsForAway;
+        char winner, delimiter = '/';
+        string field;
+        istringstream ss(line), sss;
+
+        // Extract each field of the current line using comma as the delimiter
+        while (getline(ss, field, ',')) 
+        {
+            // Use a switch statement to determine which field we are currently processing
+            switch (i)
+            {
+                case 0:
+                    round = strToInt(field);
+                    break;
+
+                case 1: 
+                    sss = istringstream(field);
+                    sss >> day >> delimiter >> month >> delimiter >> year;
+                    break;
+
+                case 2: 
+                    // If the home team is not already in the map, create a new team and add it to the map
+                    if (nameToId.find(field) == nameToId.end())
+                    {
+                        createNewTeam(field);
+                    }
+                    homeTeamId = nameToId[field];
+                    break;
+
+                case 3: 
+                    // If the away team is not already in the map, create a new team and add it to the map
+                    if (nameToId.find(field) == nameToId.end())
+                    {
+                        createNewTeam(field);
+                    }
+                    awayTeamId = nameToId[field];
+                    break;
+
+                case 4: 
+                    // If the goals for home team field is '-', set it to '0'
+                    if (field[0] == '-')field[0] = '0';
+                    goalsForHome = strToInt(field);
+                    break;
+
+                case 5: 
+                    // If the goals for away team field is '-', set it to '0'
+                    if (field[0] == '-')field[0] = '0';
+                    goalsForAway = strToInt(field);
+                    break;
+
+                case 6:
+                    winner = field[0];
+                    break;
+            }
+            i++;
+        }
+
+        // Create a Match object using the extracted match data
+        Match match(homeTeamId, awayTeamId, round, day, month, year,
+                    goalsForHome, goalsForAway, winner);
+
+        // Print the match details (for testing purposes)
+        match.print();
+
+        // Add the match to the league_rounds and league_date objects
+        league_rounds.addMatch(homeTeamId, awayTeamId, match);
+    }
+
+    // Set league_date to be a copy of league_rounds
+    league_date = league_rounds;
+    league_rounds.sortMatchesBasedOnRounds();       // sort league_rounds based on match round
+    league_date.sortMatchesBasedOnDate();           // // sort league_rounds based on match date
+
+    // Print and test the sorting functions of the league_rounds and league_date objects
+    cout << "\n\n################################################\n\n";
+    league_rounds.print();
+    cout << "\n\n################################################\n\n";
+    league_date.print();
+    cout << "\n\n################################################\n\n";
+
+    // Close the input file
+    inputFile.close();
+}
+
+// This function resets all league data by clearing various data structures and resetting league-wide stats
+void resetAll()
+{
+    // Clear the team vector, which contains information about each team in the league
+    team.clear();
+    
+    // Reset the league-rounds data structure, which tracks various stats for the league over time
+    league_rounds.reset();
+    
+    // Reset the league-date data structure, which may track different stats than league-rounds based on dates
+    league_date.reset();
+    
+    // Clear the nameToId map, which maps team names to their corresponding IDs
+    nameToId.clear();
+}
+
+void openFileDialogue()
+{   
+
+    resetAll();
+
+    clearScreen();
+	gotoxy(10, 5);
+	cout << "<< Uploud a Comma Separated File (.CSV) >>";
+	gotoxy(20, 7);
+	cout << "The file should represent matches' statistics";
+    gotoxy(25, 8);
+    cout << "of every game during the rounds of the English Premier League season";
+
+    // Initialize variables for file selection
+    OPENFILENAME ofn;           // common dialog box structure
+    char szFile[260];           // buffer for file name
+    HWND hwnd = NULL;           // owner window
+    szFile[0] = '\0';
+
+    // Initialize OPENFILENAME struct
+    ZeroMemory(&ofn, sizeof(ofn));                      // Clear memory for struct
+    ofn.lStructSize = sizeof(ofn);                      // Set size of struct
+    ofn.hwndOwner = hwnd;                               // Set owner window (null in this case)
+    ofn.lpstrFile = szFile;                             // Set buffer for file name
+    ofn.nMaxFile = sizeof(szFile);                      // Set maximum length of file name
+    ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";        // Set filter for file types
+    ofn.nFilterIndex = 1;                               // Set default filter index
+    ofn.lpstrFileTitle = NULL;                          // Set buffer for file title (not used in this case)
+    ofn.nMaxFileTitle = 0;                              // Set maximum length of file title (not used in this case)
+    ofn.lpstrInitialDir = NULL;                         // Set initial directory (not used in this case)
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;  // Set options for file selection
+
+    gotoxy(12, 12);
+    cout << "Press 'u' to browse: ";
+
+    while (true)
+    {
+        // Check if the key is pressed
+        if (_getch() == 'u') 
+        {
+            // Display the Open dialog box.
+            if (GetOpenFileName(&ofn)==TRUE) 
+            {
+                // check if it is CSV File or not
+                if (isCSVFile(szFile)) 
+                {
+                    // check if it is good CSV file or not
+                    if (isGoodCSVFile(string(szFile)))
+                    {
+                        // The File is Good so take it and go ahead
+                        clearScreen();
+                        implementTheLeagueFromFile(string(szFile));
+                        return;
+                    }
+                    else 
+                    {
+                        // the file is not good, so tell the user and make him upload another one
+                    }
+                }
+                else {
+                    gotoxy(20, 14); 
+                    cout << "The file should be a .CSV file";
+                    gotoxy(12, 16); 
+                    cout << "Press 'u' to browse: ";
+                }
+            }
+        }
+        else {
+            gotoxy(12, 12); 
+            cout << "Press 'u' to browse: ";
+        }
+    }
+}
 
 int main() 
 {
@@ -341,7 +566,7 @@ int main()
 	gotoxy(40, 15);
 	cout << "Press any key to continue";
 	_getch();
-    get_file();
+    openFileDialogue();
 	_getch();
 
     return 0;
