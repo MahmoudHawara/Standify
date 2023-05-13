@@ -178,7 +178,8 @@ class League
     private:
         bool isTeamsSorted;                     // flag to check if teams are sorted
         vector<vector<Match>> teamSchedule;     // adjacency list of the graph
-        vector<bool>vis;
+        vector<bool> vis;
+    
     public: 
         // Constructor to initialize the object
         League()
@@ -190,7 +191,7 @@ class League
         // Method to reset all the teams
         void resetTeams()
         {
-            vis.resize(team.size(),0);
+            vis.resize(team.size(), 0);
             for (int i = 0; i < team.size(); i++)
             {
                 team[i].reset();
@@ -233,46 +234,90 @@ class League
         }
 
         // Method to perform DFS on the rounds
-        void DFS_Rounds(int roundNum)
+        void DFS_Rounds(int teamID, int roundNum)
         {
-            // TODO: Implementation pending  =>  samar
+            vis[teamID] = 1;
+            
+            for(auto t: teamSchedule[teamID]) 
+            {
+                if(t.round > roundNum) return;
+
+                if(vis[t.awayTeamId]) continue;
+
+                team[teamID].matchesPlayed++;
+                team[teamID].goalsFor += t.goalsForHome;
+                team[teamID].goalsAgainst += t.goalsForAway;
+                
+                team[t.awayTeamId].matchesPlayed++;
+                team[t.awayTeamId].goalsFor += t.goalsForAway;
+                team[t.awayTeamId].goalsAgainst += t.goalsForHome;
+
+                if(t.winner == 'D') 
+                {
+                    team[teamID].points++;
+                    team[t.awayTeamId].points++;
+                    team[teamID].draw++;
+                    team[t.awayTeamId].draw++;
+                }
+                else if(t.winner == 'H') 
+                {
+                    team[teamID].points += 3;
+                    team[teamID].win++;
+                    team[t.awayTeamId].lose++;
+                }
+                else 
+                {
+                    team[teamID].lose++;
+                    team[t.awayTeamId].points += 3;
+                    team[t.awayTeamId].win++;
+                }
+
+                DFS_Rounds(t.awayTeamId, roundNum);
+            }
+            
         }
-        bool date_compare(int day1,int day2,int year1,int year2,int mon1,int mon2)
+
+        bool date_compare(int day1, int day2, int year1, int year2, int mon1, int mon2)
         {
-            if(year1>year2)return 1;
-            if(year1==year2&&mon1>mon2)return 1;
-            if(year1==year2&&mon1==mon2&&day1>day2)return 1;
+            if(year1 > year2) return 1;
+            if(year1 == year2 && mon1 > mon2) return 1;
+            if(year1 == year2 && mon1 == mon2 && day1 > day2) return 1;
             return 0;
         }
+
         // Method to perform DFS on the dates
-        void DFS_Date(int currentTeamId,int day,int year,int month)
+        void DFS_Date(int currentTeamId, int day, int year, int month)
         {
-            // TODO: Implementation pending  =>  mod
-            if(vis[currentTeamId])return;
-            vis[currentTeamId]=1;
-            for(auto i:this->teamSchedule[currentTeamId])
+            if(vis[currentTeamId]) return;
+            
+            vis[currentTeamId] = 1;
+
+            for(auto i: this->teamSchedule[currentTeamId])
             {
-                if(date_compare(i.day,day,i.year,year,i.month,month))return;
+                if(date_compare(i.day, day, i.year, year, i.month, month)) return;
+
                 team[currentTeamId].matchesPlayed++;
-                team[currentTeamId].goalsFor+=i.goalsForHome;
-                team[currentTeamId].goalsAgainst+=i.goalsForAway;
+                team[currentTeamId].goalsFor += i.goalsForHome;
+                team[currentTeamId].goalsAgainst += i.goalsForAway;
                 team[i.awayTeamId].matchesPlayed++;
-                team[i.awayTeamId].goalsAgainst+=i.goalsForHome;
-                team[i.awayTeamId].goalsFor+=i.goalsForAway;
-                if(i.winner=='H')
+                team[i.awayTeamId].goalsAgainst += i.goalsForHome;
+                team[i.awayTeamId].goalsFor += i.goalsForAway;
+
+                if(i.winner == 'H')
                 {
-                team[currentTeamId].points+=3;
+                    team[currentTeamId].points += 3;
                 }
-                else if(i.winner=='A')
+                else if(i.winner == 'A')
                 {
-                team[i.awayTeamId].points+=3;
+                    team[i.awayTeamId].points += 3;
                 }
                 else
                 {
                     team[i.awayTeamId].points++;
                     team[currentTeamId].points++;
                 }
-                DFS_Date(i.awayTeamId,day,year,month);
+                
+                DFS_Date(i.awayTeamId, day, year, month);
             }
         }
 
