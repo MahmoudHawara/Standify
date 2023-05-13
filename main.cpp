@@ -9,10 +9,16 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <regex>
 
 using namespace std;
 
+int lastRound = 0;
 map<string, int>nameToId;
+
+int main();
+void menu();
+void openFileDialogue();
 
 // this function to clear the console screen
 void clearScreen()
@@ -33,6 +39,7 @@ void gotoxy(int x, int y) {
 	c.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
+
 // This class represents a team in the league
 class Team
 {
@@ -164,7 +171,6 @@ class Match
         }
 };
 
-
 // This class represents a league with teams and their matches schedule
 class League
 {
@@ -225,7 +231,7 @@ class League
         }
 
         // Method to perform DFS on the rounds
-        void DFS_Rounds()
+        void DFS_Rounds(int roundNum)
         {
             // TODO: Implementation pending  =>  samar
         }
@@ -310,6 +316,37 @@ class League
 League league_rounds;
 League league_date;
 
+// This function converts a string representation of a number to a long long integer
+long long strToInt(string number)
+{
+    // We start with a value of 0
+    long long ret = 0;
+    
+    // For each character in the string, we multiply our current value by 10 and add the digit
+    for (int i = 0; number[i]; i++)
+    {
+        ret *= 10;
+        ret += (number[i] - '0');
+    }
+    
+    // Once we've processed all the digits, we return the final value
+    return ret;
+}
+
+// check if the input is integer
+long long isInt(string x) {
+    for(int i = 0; i < x.length(); ++i) {
+        if(!isdigit(x[i])) return 0;
+    }
+    return strToInt(x);
+}
+
+// check if the date follows the pattern
+bool isValidDate(string date) {
+    regex pattern("\\d{2}[/||-]\\d{2}[/||-]\\d{4}");
+    return regex_match(date, pattern);
+}
+
 // check if the file is CSV file or not
 bool isCSVFile(char* filename) 
 {
@@ -349,23 +386,6 @@ void createNewTeam(string teamName)
     league_rounds.addTeam();
 }
 
-// This function converts a string representation of a number to a long long integer
-long long strToInt(string number)
-{
-    // We start with a value of 0
-    long long ret = 0;
-    
-    // For each character in the string, we multiply our current value by 10 and add the digit
-    for (int i = 0; number[i]; i++)
-    {
-        ret *= 10;
-        ret += (number[i] - '0');
-    }
-    
-    // Once we've processed all the digits, we return the final value
-    return ret;
-}
-
 // This function reads league match data from a file specified by the filePath parameter
 void implementTheLeagueFromFile(string filePath)
 {
@@ -397,6 +417,7 @@ void implementTheLeagueFromFile(string filePath)
             {
                 case 0:
                     round = strToInt(field);
+                    lastRound = max(lastRound, round);
                     break;
 
                 case 1: 
@@ -446,7 +467,7 @@ void implementTheLeagueFromFile(string filePath)
                     goalsForHome, goalsForAway, winner);
 
         // Print the match details (for testing purposes)
-        match.print();
+        // match.print();
 
         // Add the match to the league_rounds and league_date objects
         league_rounds.addMatch(homeTeamId, awayTeamId, match);
@@ -458,11 +479,11 @@ void implementTheLeagueFromFile(string filePath)
     league_date.sortMatchesBasedOnDate();           // // sort league_rounds based on match date
 
     // Print and test the sorting functions of the league_rounds and league_date objects
-    cout << "\n\n################################################\n\n";
-    league_rounds.print();
-    cout << "\n\n################################################\n\n";
-    league_date.print();
-    cout << "\n\n################################################\n\n";
+    // cout << "\n\n################################################\n\n";
+    // league_rounds.print();
+    // cout << "\n\n################################################\n\n";
+    // league_date.print();
+    // cout << "\n\n################################################\n\n";
 
     // Close the input file
     inputFile.close();
@@ -534,13 +555,17 @@ void openFileDialogue()
                     if (isGoodCSVFile(string(szFile)))
                     {
                         // The File is Good so take it and go ahead
-                        clearScreen();
                         implementTheLeagueFromFile(string(szFile));
+                        menu();
                         return;
                     }
                     else 
                     {
                         // the file is not good, so tell the user and make him upload another one
+                        gotoxy(20, 14); 
+                        cout << "Invalid data - Check the file and try again";
+                        gotoxy(12, 16); 
+                        cout << "Press 'u' to browse: ";
                     }
                 }
                 else {
@@ -555,6 +580,95 @@ void openFileDialogue()
             gotoxy(12, 12); 
             cout << "Press 'u' to browse: ";
         }
+    }
+}
+
+void menu() 
+{   
+    clearScreen();
+
+    gotoxy(10, 5);
+    cout << "<< Standify - Premier League's Standing >>";
+    gotoxy(20, 8);
+    cout << "1 - The league standings for a given round";
+    gotoxy(20, 9);
+    cout << "2 - The league standings till a given round";
+    gotoxy(20, 10);
+    cout << "3 - The league standings till a given date";
+    gotoxy(20, 11);
+    cout << "4 - Back";
+    gotoxy(20, 12);
+    cout << "5 - Exit";
+    
+    string choice;
+    gotoxy(25, 15);
+    cout << "Enter your choice: ";
+    cin >> choice;
+    
+    int c = isInt(choice);
+    if(c < 1 || c > 5) menu();
+   
+    if(c < 3) {
+        string round;
+
+        gotoxy(28, 17);
+        cout << "Enter a round number: ";
+        cin >> round;
+
+        int r = isInt(round);
+        if(r < 1 || r > lastRound) {
+            gotoxy(31, 19);
+            cout << "Invalid round number, the number of rounds equals " << lastRound;
+            _getch();
+            menu();
+        }
+
+        if(c == 1) {        // get the standings for the round 
+
+        }
+        else {              // get the standings till the round 
+
+        }
+
+        // then show the standings
+        
+        
+    }
+    else if(c == 3) {
+        string date;
+        int day, month, year = 0, f = 1;
+
+        gotoxy(28, 17);
+        cout << "Enter a date (DD/MM/YYYY): ";
+        cin >> date;
+        
+        if(isValidDate(date)) {
+            day = (date[0] - '0' != 0) * 10 + (date[1] - '0'); 
+            month = (date[3] - '0' != 0) * 10 + (date[4] - '0'); 
+            for(int i = 9; i > 5; --i) {
+                year += (date[i] - '0') * f;
+                f *= 10;
+            }        
+
+            // get the standings till the date
+
+
+            // then show the standings
+           
+
+        }
+        else {
+            gotoxy(31, 19);
+            cout << "Invalid date - Follow the pattern and try again";
+            _getch();
+            menu();
+        }
+    }
+    else if(c == 4) {
+        openFileDialogue();
+    }
+    else {
+        main();
     }
 }
 
