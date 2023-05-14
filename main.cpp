@@ -43,9 +43,7 @@ void gotoxy(int x, int y) {
 // This class represents a team in the league
 class Team
 {
-    // private:
     public: 
-
         string Name;                // The name of the team
         int Id;                     // The id of the team
         int matchesPlayed;          // Number of matches played by the team
@@ -55,9 +53,10 @@ class Team
         int draw;                   // Number of matches drawn by the team
         int goalsFor;               // Number of goals scored by the team
         int goalsAgainst;           // Number of goals conceded by the team
+        bool vis;                   // check if the team visited or not in dfs
 
         // Constructor to initialize the object
-        Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0)
+        Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0, bool v = 0)
         {
             this->Name           = name;
             this->Id             = id;
@@ -68,6 +67,7 @@ class Team
             this->draw           = d;
             this->goalsFor       = gf;
             this->goalsAgainst   = ga;
+            this->vis            = v;
         }
 
         // Method to reset all the values of the team
@@ -80,12 +80,7 @@ class Team
             this->draw           = 0;
             this->goalsFor       = 0;
             this->goalsAgainst   = 0;
-        }
-
-        // getter method to get the name of the team
-        string getName()
-        {
-            return this->Name;
+            this->vis            = 0;
         }
 
         // Method to print the details of the team
@@ -116,12 +111,11 @@ class Team
         }
 };
 
-vector<Team>team;
+vector<Team>team, teamToPrint;
 
 // This class represents a match between two teams
 class Match
 {
-    // private 
     public:
         int homeTeamId;         // The id of the home team
         int awayTeamId;         // The id of the away team
@@ -170,17 +164,11 @@ class Match
             }
         }
 
-        // getter to get away team id
-        int getAwayId()
-        {
-            return this->awayTeamId;
-        }
-
         void print()
         {
             cout << this->round << ", ";
-            cout << team[this->homeTeamId].getName() << ", ";
-            cout << team[this->awayTeamId].getName() << ", ";
+            cout << team[this->homeTeamId].Name << ", ";
+            cout << team[this->awayTeamId].Name << ", ";
             cout << this->goalsForHome << ", ";
             cout << this->goalsForAway << ", ";
             cout << this->winner << '\n';
@@ -191,22 +179,15 @@ class Match
 class League
 {
     private:
-        bool isTeamsSorted;                     // flag to check if teams are sorted
         vector<vector<Match>> teamSchedule;     // adjacency list of the graph
-        vector<bool> vis;
     
     public: 
         // Constructor to initialize the object
-        League()
-        {
-            isTeamsSorted = false;
-            resetTeams();
-        }
+        League(){}
 
         // Method to reset all the teams
         void resetTeams()
         {
-            vis.resize(team.size(), 0);
             for (int i = 0; i < team.size(); i++)
             {
                 team[i].reset();
@@ -223,22 +204,20 @@ class League
             // Check if both teams exist in the schedule
             if (max(homeId, awayId) >= (int)team.size())
             {
-                cout << "Raise Error: You Forget to push a Team in The team Vector\n";
+                cerr << "Raise Error: You Forget to push a Team in The team Vector\n";
                 assert(0);
             }
 
             // Check if both teams exist in the teamSchedule
             if (max(homeId, awayId) >= (int)teamSchedule.size())
             {
-                cout << "Raise Error: You Forget to push a Team in The teamSchedule Vector\n";
+                cerr << "Raise Error: You Forget to push a Team in The teamSchedule Vector\n";
                 assert(0);
             }
 
             // Add the match to the home team's schedule
             this->teamSchedule[homeId].push_back(match);
 
-            // Mark that the teams are not sorted
-            isTeamsSorted = false;
         }
 
         // Method to add a new team to the team schedule.
@@ -249,47 +228,56 @@ class League
         }
 
         // Method to perform DFS on the rounds
-        void DFS_Rounds(int teamID, int roundNum)
+        void DFS_Rounds(int homeID, int roundNum)
         {
-            vis[teamID] = 1;
+            if (team[homeID].vis)return;
+
+            team[homeID].vis = 1;
             
-            for(auto t: teamSchedule[teamID]) 
+            for(auto match: teamSchedule[homeID]) 
             {
-                if(t.round > roundNum) return;
+                if(match.round > roundNum) return;
 
-                if(vis[t.awayTeamId]) continue;
 
-                team[teamID].matchesPlayed++;
-                team[teamID].goalsFor += t.goalsForHome;
-                team[teamID].goalsAgainst += t.goalsForAway;
+                team[homeID].matchesPlayed++;
+                team[homeID].goalsFor += match.goalsForHome;
+                team[homeID].goalsAgainst += match.goalsForAway;
                 
-                team[t.awayTeamId].matchesPlayed++;
-                team[t.awayTeamId].goalsFor += t.goalsForAway;
-                team[t.awayTeamId].goalsAgainst += t.goalsForHome;
+                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].goalsFor += match.goalsForAway;
+                team[match.awayTeamId].goalsAgainst += match.goalsForHome;
 
-                if(t.winner == 'D') 
+                if(match.winner == 'D') 
                 {
-                    team[teamID].points++;
-                    team[t.awayTeamId].points++;
-                    team[teamID].draw++;
-                    team[t.awayTeamId].draw++;
+                    team[homeID].points++;
+                    team[match.awayTeamId].points++;
+                    team[homeID].draw++;
+                    team[match.awayTeamId].draw++;
                 }
-                else if(t.winner == 'H') 
+                else if(match.winner == 'H') 
                 {
-                    team[teamID].points += 3;
-                    team[teamID].win++;
-                    team[t.awayTeamId].lose++;
+                    team[homeID].points += 3;
+                    team[homeID].win++;
+                    team[match.awayTeamId].lose++;
                 }
                 else 
                 {
-                    team[teamID].lose++;
-                    team[t.awayTeamId].points += 3;
-                    team[t.awayTeamId].win++;
+                    team[homeID].lose++;
+                    team[match.awayTeamId].points += 3;
+                    team[match.awayTeamId].win++;
                 }
 
-                DFS_Rounds(t.awayTeamId, roundNum);
+                DFS_Rounds(match.awayTeamId, roundNum);
             }
-            
+        }
+
+        void DFS_Rounds(int roundNum)
+        {
+            resetTeams();
+            for (int homeID = 0; homeID < team.size(); homeID++)
+            {
+                DFS_Rounds(homeID, roundNum);
+            }
         }
 
         bool date_compare(int day1, int day2, int year1, int year2, int mon1, int mon2)
@@ -301,38 +289,54 @@ class League
         }
 
         // Method to perform DFS on the dates
-        void DFS_Date(int currentTeamId, int day, int year, int month)
+        void DFS_Date(int homeID, int day, int year, int month)
         {
-            if(vis[currentTeamId]) return;
+            if(team[homeID].vis) return;
             
-            vis[currentTeamId] = 1;
+            team[homeID].vis = 1;
 
-            for(auto i: this->teamSchedule[currentTeamId])
+            for(auto match: this->teamSchedule[homeID])
             {
-                if(date_compare(i.day, day, i.year, year, i.month, month)) return;
+                if(date_compare(match.day, day, match.year, year, match.month, month)) return;
 
-                team[currentTeamId].matchesPlayed++;
-                team[currentTeamId].goalsFor += i.goalsForHome;
-                team[currentTeamId].goalsAgainst += i.goalsForAway;
-                team[i.awayTeamId].matchesPlayed++;
-                team[i.awayTeamId].goalsAgainst += i.goalsForHome;
-                team[i.awayTeamId].goalsFor += i.goalsForAway;
+                team[homeID].matchesPlayed++;
+                team[homeID].goalsFor += match.goalsForHome;
+                team[homeID].goalsAgainst += match.goalsForAway;
 
-                if(i.winner == 'H')
+                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].goalsAgainst += match.goalsForHome;
+                team[match.awayTeamId].goalsFor += match.goalsForAway;
+
+                if(match.winner == 'D') 
                 {
-                    team[currentTeamId].points += 3;
+                    team[homeID].points++;
+                    team[match.awayTeamId].points++;
+                    team[homeID].draw++;
+                    team[match.awayTeamId].draw++;
                 }
-                else if(i.winner == 'A')
+                else if(match.winner == 'H') 
                 {
-                    team[i.awayTeamId].points += 3;
+                    team[homeID].points += 3;
+                    team[homeID].win++;
+                    team[match.awayTeamId].lose++;
                 }
-                else
+                else 
                 {
-                    team[i.awayTeamId].points++;
-                    team[currentTeamId].points++;
+                    team[homeID].lose++;
+                    team[match.awayTeamId].points += 3;
+                    team[match.awayTeamId].win++;
                 }
                 
-                DFS_Date(i.awayTeamId, day, year, month);
+                DFS_Date(match.awayTeamId, day, year, month);
+            }
+        }
+
+        void DFS_Date(int day, int year, int month)
+        {
+            resetTeams();
+            for (int homeID = 0; homeID < team.size(); homeID++)
+            {
+               DFS_Date(homeID, day, year, month);
             }
         }
 
@@ -355,19 +359,10 @@ class League
         }
 
         // Method to sort the teams based on their standing
-        void sortTeams()
+        void sortTeams(vector<Team>& team)
         {
-            // If teams are already sorted, return
-            if (isTeamsSorted) 
-            {
-                return;
-            }
-
             // Sort the teams
             sort(team.begin(), team.end());
-
-            // Mark that the teams are sorted
-            isTeamsSorted = true;
         }
 
         void print()
@@ -376,7 +371,7 @@ class League
             {
                 for (int j = 0; j < teamSchedule[i].size(); j++)
                 {
-                    cout << team[i].getName() << ' ' << team[this->teamSchedule[i][j].getAwayId()].getName() << '\n';
+                    cout << team[i].Name << ' ' << team[this->teamSchedule[i][j].awayTeamId].Name << ' ' << this->teamSchedule[i][j].round << '\n';
                 }
                 cout << "\n\n";
             }
@@ -385,13 +380,16 @@ class League
         // Method to print the standing of the teams
         void printStanding(int y)
         {
+
+            teamToPrint = team;
+
             // First, sort the teams
-            sortTeams();
+            sortTeams(teamToPrint);
 
             // Print the standing of each team
-            for (int i = 0; i < team.size(); i++)
+            for (int i = 0; i < teamToPrint.size(); i++)
             {
-                team[i].print(y);
+                teamToPrint[i].print(y);
                 y++;
             }
         }
@@ -399,12 +397,13 @@ class League
         // This function resets the team schedule by clearing all game assignments for each team
         void reset()
         {
-            // Iterate over each element in the teamSchedule vector
-            for (int i = 0; i < this->teamSchedule.size(); i++)
-            {
-                // Clear the game assignments for the current team by calling the clear() method of the corresponding vector object
-                this->teamSchedule[i].clear();
-            }
+            // // Iterate over each element in the teamSchedule vector
+            // for (int i = 0; i < this->teamSchedule.size(); i++)
+            // {
+            //     // Clear the game assignments for the current team by calling the clear() method of the corresponding vector object
+            //     this->teamSchedule[i].clear();
+            // }
+            teamSchedule.clear();
         }
 };
 
@@ -579,6 +578,7 @@ void implementTheLeagueFromFile(string filePath)
     // cout << "\n\n################################################\n\n";
     // league_date.print();
     // cout << "\n\n################################################\n\n";
+    // _getch();
 
     // Close the input file
     inputFile.close();
@@ -716,6 +716,7 @@ void showStandings(string h, string x, bool r)
 
 void menu() 
 {   
+
     clearScreen();
 
     gotoxy(10, 5);
@@ -762,7 +763,7 @@ void menu()
         }
         else {              
             // get the standing till the round 
-            league_rounds.DFS_Rounds(0, r);   
+            league_rounds.DFS_Rounds(r);   
             // then show the standings
             showStandings("Standing till round ", round, 0);
         }
