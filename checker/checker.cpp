@@ -33,19 +33,21 @@ void gotoxy(int x, int y) {
 
 void run_programs(string filePath) 
 {
-
-    // Compile the program
+    // Compile the two programs
     system("g++ -o .\\checker\\brute_force_sol.exe .\\checker\\brute_force_sol.cpp"); 
-
+    system("g++ -o .\\checker\\graph_sol.exe .\\checker\\graph_sol.cpp");
+    
     // Construct the command with the integer argument
-    string command = ".\\checker\\brute_force_sol.exe ";
-    command += filePath;
-    command += " &";
-
-    cout << command << '\n';
+    string command  = ".\\checker\\brute_force_sol.exe ";
+    string command2 = ".\\checker\\graph_sol.exe ";
+    command  += filePath;
+    command2 += filePath;
+    command  += " &";
+    command2 += " &";
 
     // Run the program in the background
     system(command.c_str());
+    system(command2.c_str());
 }
 
 // check if the file is CSV file or not
@@ -146,20 +148,81 @@ string openFileDialogue()
     return "";
 }
 
+vector<vector<string>> parseCSV(string filename)
+{
+    ifstream file(filename);
+    vector<vector<string>> result;
+    string line;
+    while (getline(file, line))
+    {
+        stringstream ss(line);
+        vector<string> row;
+        string item;
+        while (getline(ss, item, ','))
+        {
+            row.push_back(item);
+        }
+        result.push_back(row);
+    }
+    return result;
+}
+
+bool compareCSV(string file1, string file2)
+{
+    auto csv1 = parseCSV(file1);
+    auto csv2 = parseCSV(file2);
+
+    // Compare number of rows and columns
+    if (csv1.size() != csv2.size() || csv1[0].size() != csv2[0].size())
+    {
+        return false;
+    }
+
+    // Compare data in each row and column
+    for (int i = 0; i < csv1.size(); i++)
+    {
+        for (int j = 0; j < csv1[i].size(); j++)
+        {
+            if (csv1[i][j] != csv2[i][j])
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+void goToCompare(string file1, string file2)
+{
+    gotoxy(45, 20);
+    if (compareCSV(file1, file2))
+    {
+        cout << "Accepted" << endl;
+    }
+    else
+    {
+        cout << "Files are different" << endl;
+    }
+    _getch();
+}
+
 int main() 
 {
     clearScreen();
+
     gotoxy(20, 10);
 	cout << "<< Standify - Test Graph Solution >>";
 	gotoxy(40, 15);
 	cout << "Press any key to continue";
 	_getch();
+
     string filePath = openFileDialogue();
     filePath = "\"" + filePath + "\"";
+
     run_programs(filePath);
-    gotoxy(45, 20);
-    cout << "<< Accepted >>";
-	_getch();
+
+    goToCompare("brute_force_solution.csv", "graph_solution.csv");
 
     return 0;
 }
