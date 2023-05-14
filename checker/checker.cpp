@@ -30,15 +30,14 @@ void gotoxy(int x, int y) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
 
-
 void run_programs(string filePath) 
 {
 
     // Compile the program
-    system("g++ -o .\\checker\\brute_force_sol.exe .\\checker\\brute_force_sol.cpp"); 
+    system("g++ -o .\\checker\\graph_sol.exe .\\checker\\graph_sol.cpp"); 
 
     // Construct the command with the integer argument
-    string command = ".\\checker\\brute_force_sol.exe ";
+    string command = ".\\checker\\graph_sol.exe ";
     command += filePath;
     command += " &";
 
