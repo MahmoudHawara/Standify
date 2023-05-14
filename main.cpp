@@ -13,7 +13,7 @@
 
 using namespace std;
 
-int lastRound = 0;
+int lastRound = 0, yp;
 map<string, int>nameToId;
 
 int main();
@@ -84,24 +84,30 @@ class Team
         }
 
         // Method to print the details of the team
-        void print(int y)
+        void print(int y, int c)
         {   
+
             gotoxy(5, y);
+            cout << c;
+            gotoxy(15, y);
             cout << this->Name;
-            gotoxy(28, y);
+            gotoxy(38, y);
             cout << this->matchesPlayed;
-            gotoxy(43, y);
+            gotoxy(53, y);
             cout << this->win;
-            gotoxy(52, y);
+            gotoxy(62, y);
             cout << this->lose;
-            gotoxy(63, y);
+            gotoxy(72, y);
             cout << this->draw;
-            gotoxy(75, y);
+            gotoxy(84, y);
             cout << this->goalsFor;
-            gotoxy(91, y);
+            gotoxy(100, y);
             cout << this->goalsAgainst;
-            gotoxy(107, y);
+            gotoxy(120, y);
+            cout << max(this->goalsAgainst, this->goalsFor) - min(this->goalsAgainst, this->goalsFor);
+            gotoxy(136, y);
             cout << this->points;
+
         }
 
         // Overloaded operator < to compare two teams based on their points
@@ -387,8 +393,9 @@ class League
             // Print the standing of each team
             for (int i = 0; i < teamToPrint.size(); i++)
             {
-                teamToPrint[i].print(y);
+                teamToPrint[i].print(y, i + 1);
                 y++;
+                yp = y;
             }
         }
 
@@ -420,11 +427,23 @@ long long strToInt(string number)
 }
 
 // check if the input is integer
-long long isInt(string x) {
-    for(int i = 0; i < x.length(); ++i) {
-        if(!isdigit(x[i])) return 0;
+long long isInt(string x) 
+{
+    for(int i = 0; i < x.length(); ++i) 
+    {
+        if(!isdigit(x[i])) return -1;
     }
     return strToInt(x);
+}
+
+// check if the input is string
+bool isString(string x) 
+{
+    for(int i = 0; i < x.length(); ++i) 
+    {
+        if(isdigit(x[i])) return 0;
+    }
+    return 1;
 }
 
 // check if the date follows the pattern
@@ -450,10 +469,130 @@ bool isCSVFile(char* filename)
 }
 
 // check if the CSV File is good or not
-bool isGoodCSVFile(string filePath)
-{
-    // TODO: Implementation pending  =>  Sherif
-    return true;
+string isGoodCSVFile(string filePath)
+{   
+    map<int, bool> rounds;
+
+    // Open the input file
+    ifstream inputFile(filePath);
+    if (!inputFile.is_open())
+    {
+        cerr << "Error: Unable to open file!\n";
+        assert(0); // Quit the program if unable to open the file
+    }
+
+    string line;
+    // Read the first line of the file (header) and discard it
+    getline(inputFile, line);
+
+    // Read the rest of the lines in the file and extract match data
+    while (getline(inputFile, line)) 
+    {
+        int i = 0, round, goalsForHome, goalsForAway, c = 0;
+        char winner, delimiter = '/';
+        string field;
+        istringstream ss(line), sss;
+
+        // Extract each field of the current line using comma as the delimiter
+        while (getline(ss, field, ',')) 
+        {   
+            // Use a switch statement to determine which field we are currently processing
+            switch (i)
+            { 
+                case 0:
+                    round = isInt(field);
+                    if(round == -1) 
+                    {
+                        return "The round number should be an integer";
+                    }
+                    
+                    lastRound = max(lastRound, round);
+                    rounds[round] = 1;
+                    break;
+
+                case 1: 
+                    if(!isValidDate(field)) 
+                    {
+                        return "The date should follow the format (DD/MM/YYYY)";
+                    }
+                    break;
+
+                case 2: 
+                case 3: 
+                    if(!isString(field)) 
+                    {
+                        return "The team name should be a string";
+                    }
+                    break;
+
+                case 4: 
+                    if(field[0] == '-') c++;
+                    else {
+                        goalsForHome = isInt(field);
+                        if(goalsForHome == -1) 
+                        {
+                            return "Goals count should be an integer";
+                        }
+                    }
+                    break;
+
+                case 5: 
+                    if(field[0] == '-') c++;
+                    else {
+                        goalsForAway = isInt(field);
+                        if(goalsForAway == -1) 
+                        {
+                            return "Goals count should be an integer";
+                        }
+                    }
+                    break;
+
+                case 6:
+                    winner = field[0];
+                    if(winner == '-') c++;
+
+                    if(c == 1 || c == 2) 
+                    {
+                        return "Matches that haven't yet taken place cannot contain a goals count or a result"; 
+                    }
+
+                    winner = toupper(winner);
+                    if(winner != 'H' && winner != 'A' && winner != 'D' && winner != '-') 
+                    {
+                        return "The winner should be one of (H, A, D, -)";
+                    }
+                    if((goalsForHome > goalsForAway && winner != 'H') || (goalsForAway > goalsForHome && winner != 'A') ||
+                    (goalsForAway == goalsForHome && winner != 'D' && winner != '-'))
+                    {
+                        return "The winner should match the goals count";
+                    }
+
+                    break;
+
+                default:
+                    return "Invalid input file";
+            }
+            i++;
+        }
+    }
+
+    if(rounds.empty()) 
+    {
+        return "Invalid input file";
+    }
+
+    for(int i = 1; i <= lastRound; ++i)
+    {
+        if(rounds[i] == 0) 
+        {
+            return "Some rounds result are not found";
+        }
+    }
+
+    // Close the input file
+    inputFile.close();
+
+    return "";
 }
 
 // This function creates a new team with the given name and adds it to the league
@@ -543,6 +682,10 @@ void implementTheLeagueFromFile(string filePath)
 
                 case 6:
                     winner = field[0];
+                    if(winner != '-')
+                    {
+                       winner = toupper(winner); 
+                    } 
                     break;
             }
             i++;
@@ -636,11 +779,14 @@ void openFileDialogue()
             {
                 // check if it is CSV File or not
                 if (isCSVFile(szFile)) 
-                {
+                {   
+                    string msg = isGoodCSVFile(string(szFile));
+
                     // check if it is good CSV file or not
-                    if (isGoodCSVFile(string(szFile)))
+                    if (msg == "")
                     {
                         // The File is Good so take it and go ahead
+                        lastRound = 0;
                         implementTheLeagueFromFile(string(szFile));
                         menu();
                         return;
@@ -649,7 +795,7 @@ void openFileDialogue()
                     {
                         // the file is not good, so tell the user and make him upload another one
                         gotoxy(20, 14); 
-                        cout << "Invalid data - Check the file and try again";
+                        cout << msg << "                                                          ";
                         gotoxy(12, 16); 
                         cout << "Press 'u' to browse: ";
                     }
@@ -679,20 +825,24 @@ void showStandings(string h, string x, bool r)
     cout << "<< " << h << x << " >>";
 
     gotoxy(5, 9);
+    cout << "#";
+    gotoxy(15, 9);
     cout << "Team Name";
-    gotoxy(22, 9);
+    gotoxy(32, 9);
     cout << "Matches Played";
-    gotoxy(42, 9);
+    gotoxy(52, 9);
     cout << "Won";
-    gotoxy(51, 9);
-    cout << "Lost";
     gotoxy(61, 9);
-    cout << "Draw";
+    cout << "Lost";
     gotoxy(71, 9);
+    cout << "Draw";
+    gotoxy(81, 9);
     cout << "Goals For";
-    gotoxy(85, 9);
+    gotoxy(95, 9);
     cout << "Goals Against";
-    gotoxy(104, 9);
+    gotoxy(116, 9);
+    cout << "Goals Diff";
+    gotoxy(134, 9);
     cout << "Points";
 
     if(r) {
@@ -702,6 +852,8 @@ void showStandings(string h, string x, bool r)
         league_date.printStanding(11);
     }
 
+    gotoxy(60, yp + 3);
+    cout << "Press any key to back";
     _getch();
     menu();
 }
@@ -714,34 +866,40 @@ void menu()
     gotoxy(10, 5);
     cout << "<< Standify - Premier League's Standing >>";
     gotoxy(20, 8);
-    cout << "1 - The league standings for a given round";
+    cout << "1 - The League Full Standing";
     gotoxy(20, 9);
-    cout << "2 - The league standings till a given round";
+    cout << "2 - The League Standings for a given Round";
     gotoxy(20, 10);
-    cout << "3 - The league standings till a given date";
+    cout << "3 - The League Standings till a given Round";
     gotoxy(20, 11);
-    cout << "4 - Back";
+    cout << "4 - The League Standings till a given Date";
     gotoxy(20, 12);
-    cout << "5 - Exit";
+    cout << "5 - Back";
+    gotoxy(20, 13);
+    cout << "6 - Exit";
     
     string choice;
-    gotoxy(25, 15);
+    gotoxy(25, 16);
     cout << "Enter your choice: ";
     cin >> choice;
     
     int c = isInt(choice);
-    if(c < 1 || c > 5) menu();
-   
-    if(c < 3) {
+    if(c < 1 || c > 6) menu();
+    
+    if(c == 1) {
+        league_rounds.DFS_Rounds(lastRound);
+        showStandings("Full standing for league", " ", 0);
+    }
+    else if(c < 4) {
         string round;
 
-        gotoxy(28, 17);
+        gotoxy(28, 18);
         cout << "Enter a round number: ";
         cin >> round;
 
         int r = isInt(round);
         if(r < 1 || r > lastRound) {
-            gotoxy(31, 19);
+            gotoxy(31, 20);
             cout << "Invalid round number, the number of rounds equals " << lastRound;
             _getch();
             menu();
@@ -760,11 +918,11 @@ void menu()
             showStandings("Standing till round ", round, 0);
         }
     }
-    else if(c == 3) {
+    else if(c == 4) {
         string date;
         int day, month, year = 0, f = 1;
 
-        gotoxy(28, 17);
+        gotoxy(28, 18);
         cout << "Enter a date (DD/MM/YYYY): ";
         cin >> date;
         
@@ -783,13 +941,13 @@ void menu()
             showStandings("Standing till the date ", date, 1);
         }
         else {
-            gotoxy(31, 19);
+            gotoxy(31, 20);
             cout << "Invalid date - Follow the pattern and try again";
             _getch();
             menu();
         }
     }
-    else if(c == 4) {
+    else if(c == 5) {
         openFileDialogue();
     }
     else {
