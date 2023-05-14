@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
         return 1;                                         
     }
 
-    int round = stoi(argv[1]); // Convert the second argument to an integer and store in variable
-    cout << "Received integer argument: " << round << '\n';   // Output received integer argument
+    string filePath = argv[1]; // Convert the second argument to an integer and store in variable
+    cout << "Selected Path: " << filePath << '\n';   // Output received integer argument
 
 }
