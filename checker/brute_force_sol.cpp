@@ -16,6 +16,8 @@ using namespace std;
 int lastRound = 0;
 map<string, int>nameToId;
 
+bool headToHead(int , int );
+
 // This class represents a team in the league
 class Team
 {
@@ -59,10 +61,33 @@ class Team
             this->vis            = 0;
         }
 
-        // Overloaded operator < to compare two teams based on their points
+         // This is a boolean operator that compares two instances of the Team class
         bool operator<(const Team& other)
         {
-            return this->points > other.points;
+            // If the points of this team are not equal to the points of the other team
+            if (this->points != other.points)
+                // Return true if this team has more points than the other team, false otherwise
+                return this->points > other.points;
+            
+            // If the difference between goals for and goals against for this team is not equal to the difference
+            // between goals for and goals against for the other team
+            if (this->goalsFor - this->goalsAgainst != other.goalsFor - other.goalsAgainst)
+                // Return true if the difference is greater for this team, false otherwise
+                return this->goalsFor - this->goalsAgainst > other.goalsFor - other.goalsAgainst;
+            
+            // If the number of wins for this team is not equal to the number of wins for the other team
+            if (this->win != other.win)
+                // Return true if this team has more wins than the other team, false otherwise
+                return this->win > other.win;
+            
+            // If the number of goals scored by this team is not equal to the number of goals scored by the other team
+            if (this->goalsFor != other.goalsFor)
+                // Return true if this team has scored more goals than the other team, false otherwise
+                return this->goalsFor > other.goalsFor;
+            
+            // If none of the above conditions are met, call the headToHead function
+            // to determine the order of the teams based on their head-to-head record
+            return headToHead(this->Id, other.Id);
         }
 
 };
@@ -132,6 +157,41 @@ class Match
 };
 
 vector<Match> matches;
+
+// The function takes two team IDs as input and returns a boolean value
+// indicating whether the first team has won more matches or has a
+// better goal difference than the second team in their head-to-head matches.
+bool headToHead(int teamId1, int teamId2) 
+{
+    // Initialize variables to count wins and goal differences.
+    int team1Wins = 0, team1DiffGoals = 0, team2Wins = 0, team2DiffGoals = 0;
+    
+    // Loop through all matches.
+    for (int match = 0; match < matches.size(); match++)
+    {
+        // Check if the current match is between the two teams.
+        if (matches[match].homeTeamId == teamId1 && matches[match].awayTeamId == teamId2) 
+        {
+            // Update win count and goal differences for each team.
+            matches[match].winner == 'H' ? team1Wins++ : team2Wins++;
+            team1DiffGoals += matches[match].goalsForHome - matches[match].goalsForAway;
+            team2DiffGoals += matches[match].goalsForAway - matches[match].goalsForHome;
+        }
+        else if (matches[match].homeTeamId == teamId2 && matches[match].awayTeamId == teamId1) 
+        {
+            // Update win count and goal differences for each team.
+            matches[match].winner == 'H' ? team2Wins++ : team1Wins++;
+            team2DiffGoals += matches[match].goalsForHome - matches[match].goalsForAway;
+            team1DiffGoals += matches[match].goalsForAway - matches[match].goalsForHome;
+        }
+    }
+    // If one team has won more matches, return true. Otherwise, compare
+    // the goal differences and return true if the first team has a higher
+    // goal difference than the second team.
+    if (team1Wins != team2Wins)return team1Wins > team2Wins;
+    else return team1DiffGoals > team2DiffGoals;
+}
+
 
 // This function converts a string representation of a number to a long long integer
 long long strToInt(string number)

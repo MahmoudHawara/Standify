@@ -19,6 +19,8 @@ map<string, int>nameToId;
 int main();
 void menu();
 void openFileDialogue();
+// mid man function to link between Team class and League class
+bool headToHead(int , int);
 
 // this function to clear the console screen
 void clearScreen()
@@ -104,11 +106,35 @@ class Team
             cout << this->points;
         }
 
-        // Overloaded operator < to compare two teams based on their points
+        // This is a boolean operator that compares two instances of the Team class
         bool operator<(const Team& other)
         {
-            return this->points > other.points;
+            // If the points of this team are not equal to the points of the other team
+            if (this->points != other.points)
+                // Return true if this team has more points than the other team, false otherwise
+                return this->points > other.points;
+            
+            // If the difference between goals for and goals against for this team is not equal to the difference
+            // between goals for and goals against for the other team
+            if (this->goalsFor - this->goalsAgainst != other.goalsFor - other.goalsAgainst)
+                // Return true if the difference is greater for this team, false otherwise
+                return this->goalsFor - this->goalsAgainst > other.goalsFor - other.goalsAgainst;
+            
+            // If the number of wins for this team is not equal to the number of wins for the other team
+            if (this->win != other.win)
+                // Return true if this team has more wins than the other team, false otherwise
+                return this->win > other.win;
+            
+            // If the number of goals scored by this team is not equal to the number of goals scored by the other team
+            if (this->goalsFor != other.goalsFor)
+                // Return true if this team has scored more goals than the other team, false otherwise
+                return this->goalsFor > other.goalsFor;
+            
+            // If none of the above conditions are met, call the headToHead function
+            // to determine the order of the teams based on their head-to-head record
+            return headToHead(this->Id, other.Id);
         }
+
 };
 
 vector<Team>team, teamToPrint;
@@ -392,6 +418,47 @@ class League
             }
         }
 
+        // A function that determines head-to-head ranking between two teams.
+        bool headToHead(int teamId1, int teamId2)
+        {
+            // Initialize variables to keep track of wins and goal differences for both teams.
+            int team1Wins = 0, team1DiffGoals = 0, team2Wins = 0, team2DiffGoals = 0;
+
+            // Loop through the matches of the first team against the second team.
+            for (int match = 0; match < teamSchedule[teamId1].size(); match++)
+            {
+                // If the away team is not the second team, skip this iteration.
+                if (teamSchedule[teamId1][match].awayTeamId != teamId2) continue;
+                
+                // Increment the win count for the corresponding team based on who won the match.
+                teamSchedule[teamId1][match].winner == 'H' ? team1Wins++ : team2Wins++;
+                
+                // Calculate the difference in goals scored and conceded for both teams.
+                team1DiffGoals += teamSchedule[teamId1][match].goalsForHome - teamSchedule[teamId1][match].goalsForAway;
+                team2DiffGoals += teamSchedule[teamId1][match].goalsForAway - teamSchedule[teamId1][match].goalsForHome;
+            }
+
+            // Loop through the matches of the second team against the first team.
+            for (int match = 0; match < teamSchedule[teamId2].size(); match++)
+            {
+                // If the away team is not the first team, skip this iteration.
+                if (teamSchedule[teamId2][match].awayTeamId != teamId1) continue;
+                
+                // Increment the win count for the corresponding team based on who won the match.
+                teamSchedule[teamId2][match].winner == 'H' ? team2Wins++ : team1Wins++;
+                
+                // Calculate the difference in goals scored and conceded for both teams.
+                team2DiffGoals += teamSchedule[teamId2][match].goalsForHome - teamSchedule[teamId2][match].goalsForAway;
+                team1DiffGoals += teamSchedule[teamId2][match].goalsForAway - teamSchedule[teamId2][match].goalsForHome;
+            }
+
+            // If the number of wins is different for the two teams, return the one with more wins.
+            if (team1Wins != team2Wins) return team1Wins > team2Wins;
+
+            // Otherwise, return the team with a better goal difference.
+            return team1DiffGoals > team2DiffGoals;
+        }
+
         // This function resets the team schedule by clearing all game assignments for each team
         void reset()
         {
@@ -401,6 +468,12 @@ class League
 
 League league_rounds;
 League league_date;
+
+// this function as a mid man between the Team class and League class
+bool headToHead(int teamId1 , int teamId2)
+{
+    return league_rounds.headToHead(teamId1, teamId2);
+}
 
 // This function converts a string representation of a number to a long long integer
 long long strToInt(string number)

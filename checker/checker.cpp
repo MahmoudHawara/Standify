@@ -172,6 +172,7 @@ bool compareCSV(string file1, string file2)
     auto csv1 = parseCSV(file1);
     auto csv2 = parseCSV(file2);
 
+
     // Compare number of rows and columns
     if (csv1.size() != csv2.size() || (csv1.empty() == 0 && csv1[0].size() != csv2[0].size()))
     {
@@ -222,7 +223,8 @@ int main()
 
     run_programs(filePath);
 
-    goToCompare("brute_force_solution.csv", "graph_solution.csv");
+    goToCompare("D:\\hawara\\Projects\\Standify\\checker\\brute_force_solution.csv",    
+                "D:\\hawara\\Projects\\Standify\\checker\\graph_solution.csv");
 
     return 0;
 }
