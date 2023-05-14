@@ -1,1 +1,0 @@
-D:\\hawara\\Projects\\Standify\\checker\\
