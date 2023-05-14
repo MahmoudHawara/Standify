@@ -163,6 +163,7 @@ vector<vector<string>> parseCSV(string filename)
         }
         result.push_back(row);
     }
+    file.close();
     return result;
 }
 
@@ -172,7 +173,7 @@ bool compareCSV(string file1, string file2)
     auto csv2 = parseCSV(file2);
 
     // Compare number of rows and columns
-    if (csv1.size() != csv2.size() || csv1[0].size() != csv2[0].size())
+    if (csv1.size() != csv2.size() || (csv1.empty() == 0 && csv1[0].size() != csv2[0].size()))
     {
         return false;
     }
