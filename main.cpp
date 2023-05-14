@@ -89,9 +89,24 @@ class Team
         }
 
         // Method to print the details of the team
-        void print()
-        {
-            // TODO: Implementation pending
+        void print(int y)
+        {   
+            gotoxy(5, y);
+            cout << this->Name;
+            gotoxy(28, y);
+            cout << this->matchesPlayed;
+            gotoxy(43, y);
+            cout << this->win;
+            gotoxy(52, y);
+            cout << this->lose;
+            gotoxy(63, y);
+            cout << this->draw;
+            gotoxy(75, y);
+            cout << this->goalsFor;
+            gotoxy(91, y);
+            cout << this->goalsAgainst;
+            gotoxy(107, y);
+            cout << this->points;
         }
 
         // Overloaded operator < to compare two teams based on their points
@@ -368,7 +383,7 @@ class League
         }
 
         // Method to print the standing of the teams
-        void printStanding()
+        void printStanding(int y)
         {
             // First, sort the teams
             sortTeams();
@@ -376,7 +391,8 @@ class League
             // Print the standing of each team
             for (int i = 0; i < team.size(); i++)
             {
-                team[i].print();
+                team[i].print(y);
+                y++;
             }
         }
 
@@ -661,6 +677,43 @@ void openFileDialogue()
     }
 }
 
+void showStandings(string h, string x, bool r) 
+{
+    clearScreen();
+
+    gotoxy(10, 3);
+    cout << "<< Standify - Premier League's Standing >>";
+    gotoxy(5, 6);
+    cout << "<< " << h << x << " >>";
+
+    gotoxy(5, 9);
+    cout << "Team Name";
+    gotoxy(22, 9);
+    cout << "Matches Played";
+    gotoxy(42, 9);
+    cout << "Won";
+    gotoxy(51, 9);
+    cout << "Lost";
+    gotoxy(61, 9);
+    cout << "Draw";
+    gotoxy(71, 9);
+    cout << "Goals For";
+    gotoxy(85, 9);
+    cout << "Goals Against";
+    gotoxy(104, 9);
+    cout << "Points";
+
+    if(r) {
+        league_rounds.printStanding(11);
+    }
+    else {
+        league_date.printStanding(11);
+    }
+
+    _getch();
+    menu();
+}
+
 void menu() 
 {   
     clearScreen();
@@ -701,16 +754,18 @@ void menu()
             menu();
         }
 
-        if(c == 1) {        // get the standings for the round 
+        if(c == 1) {        
+            // get the standing for the round 
 
+            // then show the standings
+            showStandings("Standing for the round ", round, 0);
         }
-        else {              // get the standings till the round 
-
+        else {              
+            // get the standing till the round 
+            league_rounds.DFS_Rounds(0, r);   
+            // then show the standings
+            showStandings("Standing till round ", round, 0);
         }
-
-        // then show the standings
-        
-        
     }
     else if(c == 3) {
         string date;
@@ -729,11 +784,10 @@ void menu()
             }        
 
             // get the standings till the date
-
+            league_date.DFS_Date(0, day, year, month); 
 
             // then show the standings
-           
-
+            showStandings("Standing till the date ", date, 1);
         }
         else {
             gotoxy(31, 19);
