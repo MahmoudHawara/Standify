@@ -35,12 +35,14 @@ void run_programs(string filePath)
 {
 
     // Compile the program
-    system("g++ -o .\\checker\\graph_sol.exe .\\checker\\graph_sol.cpp"); 
+    system("g++ -o .\\checker\\brute_force_sol.exe .\\checker\\brute_force_sol.cpp"); 
 
     // Construct the command with the integer argument
-    string command = ".\\checker\\graph_sol.exe ";
+    string command = ".\\checker\\brute_force_sol.exe ";
     command += filePath;
-    command += "&";
+    command += " &";
+
+    cout << command << '\n';
 
     // Run the program in the background
     system(command.c_str());
@@ -153,6 +155,7 @@ int main()
 	cout << "Press any key to continue";
 	_getch();
     string filePath = openFileDialogue();
+    filePath = "\"" + filePath + "\"";
     run_programs(filePath);
     gotoxy(45, 20);
     cout << "<< Accepted >>";
