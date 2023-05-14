@@ -270,7 +270,6 @@ class League
                 DFS_Rounds(match.awayTeamId, roundNum);
             }
         }
-
         void DFS_Rounds(int roundNum)
         {
             resetTeams();
@@ -330,7 +329,6 @@ class League
                 DFS_Date(match.awayTeamId, day, year, month);
             }
         }
-
         void DFS_Date(int day, int year, int month)
         {
             resetTeams();
@@ -397,12 +395,6 @@ class League
         // This function resets the team schedule by clearing all game assignments for each team
         void reset()
         {
-            // // Iterate over each element in the teamSchedule vector
-            // for (int i = 0; i < this->teamSchedule.size(); i++)
-            // {
-            //     // Clear the game assignments for the current team by calling the clear() method of the corresponding vector object
-            //     this->teamSchedule[i].clear();
-            // }
             teamSchedule.clear();
         }
 };

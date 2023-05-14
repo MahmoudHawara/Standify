@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
 
     string filePath = argv[1]; // Convert the second argument to an integer and store in variable
 
-    cout << "Selected Path: " << filePath << '\n';   // Output received integer argument
+    // cout << "Selected Path: " << filePath << '\n';   // Output received integer argument
 
     ReadFile(filePath);
 

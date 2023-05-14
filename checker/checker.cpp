@@ -30,7 +30,6 @@ void gotoxy(int x, int y) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
 
-
 void run_programs(string filePath) 
 {
     // Compile the two programs
