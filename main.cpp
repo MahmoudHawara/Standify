@@ -311,6 +311,78 @@ class League
             }
         }
 
+        // Method to get the first match played in a given round for each team
+        int getFirst(int homeID, int roundNum) 
+        {
+            int cnt = (int)teamSchedule[homeID].size();
+            int l = 0, r = cnt - 1;
+
+            while(l < r) 
+            {
+                int match_idx = (l + r) / 2;
+                auto match = teamSchedule[homeID][match_idx];
+
+                if(match.round < roundNum) l = match_idx + 1;
+                else r = match_idx; 
+            }
+
+            return l;
+        }
+
+        // Method to get the matches played for a given round     
+        void DFS_Round(int homeID, int roundNum) 
+        {
+            if(team[homeID].vis) return;
+            team[homeID].vis = 1;
+            
+            int match_idx = getFirst(homeID, roundNum);
+
+            for(; match_idx < teamSchedule[homeID].size(); ++match_idx)
+            {
+                auto match = teamSchedule[homeID][match_idx];
+                
+                if(match.round != roundNum) return;
+
+                team[homeID].matchesPlayed++;
+                team[homeID].goalsFor += match.goalsForHome;
+                team[homeID].goalsAgainst += match.goalsForAway;
+                
+                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].goalsFor += match.goalsForAway;
+                team[match.awayTeamId].goalsAgainst += match.goalsForHome;
+
+                if(match.winner == 'D') 
+                {
+                    team[homeID].points++;
+                    team[match.awayTeamId].points++;
+                    team[homeID].draw++;
+                    team[match.awayTeamId].draw++;
+                }
+                else if(match.winner == 'H') 
+                {
+                    team[homeID].points += 3;
+                    team[homeID].win++;
+                    team[match.awayTeamId].lose++;
+                }
+                else 
+                {
+                    team[homeID].lose++;
+                    team[match.awayTeamId].points += 3;
+                    team[match.awayTeamId].win++;
+                }
+
+                DFS_Round(match.awayTeamId, roundNum);
+            }
+        }
+        void DFS_Round(int roundNum) 
+        {
+            resetTeams();
+            for(int homeID = 0; homeID < team.size(); ++homeID)  
+            {   
+                DFS_Round(homeID, roundNum); 
+            }
+        }
+
         bool date_compare(int day1, int day2, int year1, int year2, int mon1, int mon2)
         {
             if(year1 > year2) return 1;
@@ -941,11 +1013,11 @@ void menu()
     gotoxy(20, 8);
     cout << "1 - The League Full Standing";
     gotoxy(20, 9);
-    cout << "2 - The League Standings for a given Round";
+    cout << "2 - The League Standing for a given Round";
     gotoxy(20, 10);
-    cout << "3 - The League Standings till a given Round";
+    cout << "3 - The League Standing till a given Round";
     gotoxy(20, 11);
-    cout << "4 - The League Standings till a given Date";
+    cout << "4 - The League Standing till a given Date";
     gotoxy(20, 12);
     cout << "5 - Back";
     gotoxy(20, 13);
@@ -978,9 +1050,9 @@ void menu()
             menu();
         }
 
-        if(c == 1) {        
+        if(c == 2) {        
             // get the standing for the round 
-
+            league_rounds.DFS_Round(r);
             // then show the standings
             showStandings("Standing for the round ", round, 0);
         }
