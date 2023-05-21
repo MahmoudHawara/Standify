@@ -19,8 +19,14 @@ map<string, int>nameToId;
 int main();
 void menu();
 void openFileDialogue();
-// mid man function to link between Team class and League class
-bool headToHead(int , int);
+bool headToHead(int , int);         // mid man function to link between Team class and League class
+
+// change console's dimensions
+void resizeConsole()
+{
+    HWND console = GetConsoleWindow();
+    MoveWindow(console, 100, 0, 1090, 800, TRUE);
+}
 
 // this function to clear the console screen
 void clearScreen()
@@ -1101,13 +1107,16 @@ void menu()
 }
 
 int main() 
-{
+{   
+    resizeConsole();
     clearScreen();
+
     gotoxy(20, 10);
 	cout << "<< Standify - Premier League's Standing >>";
 	gotoxy(40, 15);
 	cout << "Press any key to continue";
 	_getch();
+
     openFileDialogue();
 	_getch();
 
