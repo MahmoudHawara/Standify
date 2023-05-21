@@ -32,7 +32,7 @@ class Team
         int goalsFor;               // Number of goals scored by the team
         int goalsAgainst;           // Number of goals conceded by the team
         bool vis;                   // check if the team visited or not in dfs
-
+        int pendingMatches;
         // Constructor to initialize the object
         Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0, bool v = 0)
         {
@@ -46,6 +46,7 @@ class Team
             this->goalsFor       = gf;
             this->goalsAgainst   = ga;
             this->vis            = v;
+            this->pendingMatches=0;
         }
 
         // Method to reset all the values of the team
@@ -59,6 +60,7 @@ class Team
             this->goalsFor       = 0;
             this->goalsAgainst   = 0;
             this->vis            = 0;
+            this->pendingMatches=0;
         }
 
          // This is a boolean operator that compares two instances of the Team class
@@ -107,7 +109,7 @@ class Match
         int goalsForHome;       // The number of goals scored by the home team
         int goalsForAway;       // The number of goals scored by the away team
         char winner;            // d = Draw, h = Home, a = Away
-
+        
         // Constructor to initialize the object
         Match(int hId, int aId, int r, int d, int m, int y, int gh, int ga, char w)
         {
@@ -346,12 +348,17 @@ void solve(int roundNum)
             team[match.homeTeamId].win++;
             team[match.awayTeamId].lose++;
         }
-        else 
+        else if(match.winner == 'A')
         {
             team[match.homeTeamId].lose++;
             team[match.awayTeamId].points += 3;
             team[match.awayTeamId].win++;
         }
+        else{
+            team[match.homeTeamId].pendingMatches++;
+            team[match.awayTeamId].pendingMatches++;
+        }
+        
     }
 
     toPrint = team;
