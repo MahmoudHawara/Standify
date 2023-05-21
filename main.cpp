@@ -355,7 +355,7 @@ class League
                 auto match = teamSchedule[homeID][match_idx];
                 
                 if(match.round > endRound) return;
-
+		if(match.round < roundNum)continue;
                 team[homeID].matchesPlayed++;
                 team[homeID].goalsFor += match.goalsForHome;
                 team[homeID].goalsAgainst += match.goalsForAway;
