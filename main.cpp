@@ -63,8 +63,9 @@ class Team
         int goalsAgainst;           // Number of goals conceded by the team
         bool vis;                   // check if the team visited or not in dfs
         int pendingMatches;
+
         // Constructor to initialize the object
-        Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0, bool v = 0)
+        Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0, bool v = 0, int pm = 0)
         {
             this->Name           = name;
             this->Id             = id;
@@ -76,6 +77,7 @@ class Team
             this->goalsFor       = gf;
             this->goalsAgainst   = ga;
             this->vis            = v;
+            this->pendingMatches = pm;
         }
 
         // Method to reset all the values of the team
@@ -89,7 +91,7 @@ class Team
             this->goalsFor       = 0;
             this->goalsAgainst   = 0;
             this->vis            = 0;
-            this->pendingMatches=0;
+            this->pendingMatches = 0;
         }
 
         // Method to print the details of the team
@@ -502,19 +504,20 @@ class League
         bool printStanding(int y)
         {
 
+            bool ret = 0;
             teamToPrint = team;
 
             // First, sort the teams
             sortTeams(teamToPrint);
-            bool ret=0;
+
             // Print the standing of each team
             for (int i = 0; i < teamToPrint.size(); i++)
             {
                 teamToPrint[i].print(y, i + 1);
-                if(teamToPrint[i].pendingMatches)ret=1;
+                if(teamToPrint[i].pendingMatches) ret = 1;
                 y++;
-                yp = y;
             }
+            yp = y;
             return ret;
         }
 
@@ -1009,22 +1012,24 @@ void showStandings(string h, string x, bool r)
     cout << "Goals Diff";
     gotoxy(134, 9);
     cout << "Points";
-    bool ok=0;
+
+    bool ok = 0;
     if(r) {
-        ok=league_rounds.printStanding(11);
+        ok = league_rounds.printStanding(11);
     }
     else {
-        ok=league_date.printStanding(11);
+        ok = league_date.printStanding(11);
     }
+
     if(ok)
     {
-        gotoxy(60, yp + 3);
-        cout << "there is unplayed matches";
-        yp+=3;
+        gotoxy(58, yp + 3);
+        cout << "There are unplayed matches";
+        yp += 3;
     }
     gotoxy(60, yp + 3);
     cout << "Press any key to back";
-    if(ok)yp-=3;
+    
     _getch();
     menu();
 }
