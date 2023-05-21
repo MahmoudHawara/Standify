@@ -14,7 +14,7 @@ Our checker allows you to quickly and efficiently validate your program outputs,
 
 - A working solution for the problem being solved.
 
-- Your new `.cpp` solution file should be located in the same directory as both **''checker.cpp''** and **''brute_force_sol.cpp''**.
+- Your new `graph_sol.cpp` solution file should be located in the same directory as both **''checker.cpp''** and **''brute_force_sol.cpp''**.
 
 ## Usage
 
