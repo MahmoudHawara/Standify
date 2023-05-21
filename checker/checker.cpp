@@ -7,8 +7,14 @@
 #include <string>
 #include <sstream>
 #include <regex>
+#include <map>
+#include <cassert>
+#include <unistd.h>
 
 using namespace std;
+
+int lastRound = 0;
+int main();
 
 // this function to clear the console screen
 void clearScreen()
@@ -30,15 +36,58 @@ void gotoxy(int x, int y) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
 
+// This function converts a string representation of a number to a long long integer
+long long strToInt(string number)
+{
+    // We start with a value of 0
+    long long ret = 0;
+    
+    // For each character in the string, we multiply our current value by 10 and add the digit
+    for (int i = 0; number[i]; i++)
+    {
+        ret *= 10;
+        ret += (number[i] - '0');
+    }
+    
+    // Once we've processed all the digits, we return the final value
+    return ret;
+}
+
+// check if the input is integer
+long long isInt(string x) 
+{
+    for(int i = 0; i < x.length(); ++i) 
+    {
+        if(!isdigit(x[i])) return -1;
+    }
+    return strToInt(x);
+}
+
+// check if the input is string
+bool isString(string x) 
+{
+    for(int i = 0; i < x.length(); ++i) 
+    {
+        if(isdigit(x[i])) return 0;
+    }
+    return 1;
+}
+
+// check if the date follows the pattern
+bool isValidDate(string date) {
+    regex pattern("\\d{2}[/||-]\\d{2}[/||-]\\d{4}");
+    return regex_match(date, pattern);
+}
+
 void run_programs(string filePath) 
 {
     // Compile the two programs
-    system("g++ -o .\\checker\\brute_force_sol.exe .\\checker\\brute_force_sol.cpp"); 
-    system("g++ -o .\\checker\\graph_sol.exe .\\checker\\graph_sol.cpp");
+    system("g++ -o .\\brute_force_sol.exe .\\brute_force_sol.cpp"); 
+    system("g++ -o .\\graph_sol.exe .\\graph_sol.cpp");
     
     // Construct the command with the integer argument
-    string command  = ".\\checker\\brute_force_sol.exe ";
-    string command2 = ".\\checker\\graph_sol.exe ";
+    string command  = ".\\brute_force_sol.exe ";
+    string command2 = ".\\graph_sol.exe ";
     command  += filePath;
     command2 += filePath;
     command  += " &";
@@ -66,10 +115,130 @@ bool isCSVFile(char* filename)
 }
 
 // check if the CSV File is good or not
-bool isGoodCSVFile(string filePath)
-{
-    // TODO: Implementation pending  =>  Sherif
-    return true;
+string isGoodCSVFile(string filePath)
+{   
+    map<int, bool> rounds;
+
+    // Open the input file
+    ifstream inputFile(filePath);
+    if (!inputFile.is_open())
+    {
+        cerr << "Error: Unable to open file!\n";
+        assert(0); // Quit the program if unable to open the file
+    }
+
+    string line;
+    // Read the first line of the file (header) and discard it
+    getline(inputFile, line);
+
+    // Read the rest of the lines in the file and extract match data
+    while (getline(inputFile, line)) 
+    {
+        int i = 0, round, goalsForHome, goalsForAway, c = 0;
+        char winner, delimiter = '/';
+        string field;
+        istringstream ss(line), sss;
+
+        // Extract each field of the current line using comma as the delimiter
+        while (getline(ss, field, ',')) 
+        {   
+            // Use a switch statement to determine which field we are currently processing
+            switch (i)
+            { 
+                case 0:
+                    round = isInt(field);
+                    if(round == -1) 
+                    {
+                        return "The round number should be an integer";
+                    }
+                    
+                    lastRound = max(lastRound, round);
+                    rounds[round] = 1;
+                    break;
+
+                case 1: 
+                    if(!isValidDate(field)) 
+                    {
+                        return "The date should follow the format (DD/MM/YYYY)";
+                    }
+                    break;
+
+                case 2: 
+                case 3: 
+                    if(!isString(field)) 
+                    {
+                        return "The team name should be a string";
+                    }
+                    break;
+
+                case 4: 
+                    if(field[0] == '-') c++;
+                    else {
+                        goalsForHome = isInt(field);
+                        if(goalsForHome == -1) 
+                        {
+                            return "Goals count should be an integer";
+                        }
+                    }
+                    break;
+
+                case 5: 
+                    if(field[0] == '-') c++;
+                    else {
+                        goalsForAway = isInt(field);
+                        if(goalsForAway == -1) 
+                        {
+                            return "Goals count should be an integer";
+                        }
+                    }
+                    break;
+
+                case 6:
+                    winner = field[0];
+                    if(winner == '-') c++;
+
+                    if(c == 1 || c == 2) 
+                    {
+                        return "Matches that haven't yet taken place cannot contain a goals count or a result"; 
+                    }
+
+                    winner = toupper(winner);
+                    if(winner != 'H' && winner != 'A' && winner != 'D' && winner != '-') 
+                    {
+                        return "The winner should be one of (H, A, D, -)";
+                    }
+                    if((goalsForHome > goalsForAway && winner != 'H') || (goalsForAway > goalsForHome && winner != 'A') ||
+                    (goalsForAway == goalsForHome && winner != 'D' && winner != '-'))
+                    {
+                        return "The winner should match the goals count";
+                    }
+
+                    break;
+
+                default:
+                    return "Invalid input file";
+            }
+            i++;
+        }
+    }
+
+    if(rounds.empty()) 
+    {
+        return "Invalid input file";
+    }
+
+    for(int i = 1; i <= lastRound; ++i)
+    {
+        if(rounds[i] == 0) 
+        {
+            return "Some rounds result are not found";
+        }
+    }
+
+    // Close the input file
+    inputFile.close();
+
+    return "";
 }
 
 string openFileDialogue()
@@ -115,8 +284,10 @@ string openFileDialogue()
                 // check if it is CSV File or not
                 if (isCSVFile(szFile)) 
                 {
+                    string msg = isGoodCSVFile(string(szFile));
+
                     // check if it is good CSV file or not
-                    if (isGoodCSVFile(string(szFile)))
+                    if (msg == "")
                     {
                         // The File is Good so take it and go ahead
                         return (string(szFile));  
@@ -125,7 +296,7 @@ string openFileDialogue()
                     {
                         // the file is not good, so tell the user and make him upload another one
                         gotoxy(20, 14); 
-                        cout << "Invalid data - Check the file and try again";
+                        cout << msg << "                                                          ";
                         gotoxy(12, 16); 
                         cout << "Press 'u' to browse: ";
                     }
@@ -196,16 +367,18 @@ bool compareCSV(string file1, string file2)
 
 void goToCompare(string file1, string file2)
 {
-    gotoxy(45, 20);
     if (compareCSV(file1, file2))
     {
-        cout << "Accepted" << endl;
+        gotoxy(55, 20);
+        cout << "Accepted";
     }
     else
     {
-        cout << "Files are different" << endl;
+        gotoxy(45, 20);
+        cout << "Files are different";
     }
     _getch();
+    main();
 }
 
 int main() 
@@ -221,10 +394,12 @@ int main()
     string filePath = openFileDialogue();
     filePath = "\"" + filePath + "\"";
 
+    // set the path of checker directory 
+    chdir("");
+    
     run_programs(filePath);
 
-    goToCompare("D:\\hawara\\Projects\\Standify\\checker\\brute_force_solution.csv",    
-                "D:\\hawara\\Projects\\Standify\\checker\\graph_solution.csv");
+    goToCompare(".\\brute_force_solution.csv", ".\\graph_solution.csv");
 
     return 0;
 }

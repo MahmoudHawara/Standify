@@ -437,6 +437,10 @@ void ReadFile(string filePath)
 
                 case 6:
                     winner = field[0];
+                    if(winner != '-')
+                    {
+                       winner = toupper(winner); 
+                    } 
                     break;
             }
             i++;
@@ -454,7 +458,6 @@ void ReadFile(string filePath)
     inputFile.close();
 }
 
-
 int main(int argc, char* argv[]) 
 {
     // Check if the number of arguments passed is not equal to 2
@@ -466,11 +469,9 @@ int main(int argc, char* argv[])
 
     string filePath = argv[1]; // Convert the second argument to an integer and store in variable
 
-    // cout << "Selected Path: " << filePath << '\n';   // Output received integer argument
-
     ReadFile(filePath);
 
-    ofstream out(".\\checker\\graph_solution.csv");
+    ofstream out("graph_solution.csv");
 
     league_rounds.sortMatchesBasedOnRounds();
 
@@ -492,4 +493,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

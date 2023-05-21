@@ -192,7 +192,6 @@ bool headToHead(int teamId1, int teamId2)
     else return team1DiffGoals > team2DiffGoals;
 }
 
-
 // This function converts a string representation of a number to a long long integer
 long long strToInt(string number)
 {
@@ -294,6 +293,10 @@ void ReadFile(string filePath)
 
                 case 6:
                     winner = field[0];
+                    if(winner != '-')
+                    {
+                       winner = toupper(winner); 
+                    } 
                     break;
             }
             i++;
@@ -366,11 +369,9 @@ int main(int argc, char* argv[])
 
     string filePath = argv[1]; // Convert the second argument to an integer and store in variable
 
-    // cout << "Selected Path: " << filePath << '\n';   // Output received integer argument
-
     ReadFile(filePath);
 
-    ofstream out(".\\checker\\brute_force_solution.csv");
+    ofstream out("brute_force_solution.csv");
 
     for(int r = 1; r <= lastRound; ++r) 
     {
