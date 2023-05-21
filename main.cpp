@@ -343,7 +343,7 @@ class League
         }
 
         // Method to get the matches played for a given round     
-        void DFS_Round(int homeID, int roundNum,int endRound) 
+        void DFS_Round(int homeID, int roundNum, int endRound) 
         {
             if(team[homeID].vis) return;
             team[homeID].vis = 1;
@@ -388,15 +388,15 @@ class League
                     team[match.awayTeamId].pendingMatches++;
                 }
 
-                DFS_Round(match.awayTeamId, roundNum,endRound);
+                DFS_Round(match.awayTeamId, roundNum, endRound);
             }
         }
-        void DFS_Round(int roundNum,int endRound) 
+        void DFS_Round(int roundNum, int endRound) 
         {
             resetTeams();
             for(int homeID = 0; homeID < team.size(); ++homeID)  
             {   
-                DFS_Round(homeID, roundNum,endRound); 
+                DFS_Round(homeID, roundNum, endRound); 
             }
         }
 
@@ -983,15 +983,15 @@ void openFileDialogue()
     }
 }
 
-void showStandings(string h, string x,string rEnd, bool r) 
+void showStandings(string h, string x, string rEnd, bool r) 
 {
     clearScreen();
 
     gotoxy(10, 3);
     cout << "<< Standify - Premier League's Standing >>";
     gotoxy(5, 6);
-    if(rEnd=="")cout << "<< " << h << x << " >>";
-    else cout << "<< " << h << x<<" - "<<rEnd<< " >>";
+    if(rEnd == "") cout << "<< " << h << x << " >>";
+    else cout << "<< " << h << x << "-" << rEnd << " >>";
 
     gotoxy(5, 9);
     cout << "#";
@@ -1058,7 +1058,7 @@ void menu()
     cout << "7 - Exit";
     
     string choice;
-    gotoxy(25, 16);
+    gotoxy(25, 17);
     cout << "Enter your choice: ";
     cin >> choice;
     
@@ -1067,19 +1067,19 @@ void menu()
     
     if(c == 1) {
         league_rounds.DFS_Rounds(lastRound);
-        showStandings("Full standing for league", "","", 0);
+        showStandings("Full standing for league", "", "", 0);
     }
     else if(c < 5) {
         string round;
 
-        gotoxy(28, 18);
-        if(c!=3)cout << "Enter a round number: ";
-        else cout<<"Enter start round number: ";
+        gotoxy(28, 19);
+        if(c != 3) cout << "Enter a round number: ";
+        else cout << "Enter start round number: ";
         cin >> round;
 
         int r = isInt(round);
         if(r < 1 || r > lastRound) {
-            gotoxy(31, 20);
+            gotoxy(31, 22);
             cout << "Invalid round number, the number of rounds equals " << lastRound;
             _getch();
             menu();
@@ -1087,41 +1087,43 @@ void menu()
 
         if(c == 2) {        
             // get the standing for the round 
-            league_rounds.DFS_Round(r,r);
+            league_rounds.DFS_Round(r, r);
             // then show the standings
-            showStandings("Standing for the round ", round,"", 0);
+            showStandings("Standing for the round ", round, "", 0);
         }
-        else if(c==3)
+        else if(c == 3)
         {
             string round2;
+
             gotoxy(28, 20);
             cout << "Enter end round number: ";
             cin >> round2;
 
             int r2 = isInt(round2);
             if(r2 < r || r2 > lastRound) {
-                gotoxy(31, 22);
-                cout << "Invalid round number, the number of rounds must be between given start and  " << lastRound;
+                gotoxy(31, 23);
+                cout << "The end round number must be between the given start " << r << " and " << lastRound;
                 _getch();
                 menu();
             }
-        // get the standing for the round 
-            league_rounds.DFS_Round(r,r2);
+            
+            // get the standing for the round 
+            league_rounds.DFS_Round(r, r2);
             // then show the standings
-            showStandings("Standing for the round ",round, round2, 0);
+            showStandings("Standing for rounds interval ", round, round2, 0);
         }
         else {              
             // get the standing till the round 
             league_rounds.DFS_Rounds(r);   
             // then show the standings
-            showStandings("Standing till round ", round,"", 0);
+            showStandings("Standing till round ", round, "", 0);
         }
     }
     else if(c == 5) {
         string date;
         int day, month, year = 0, f = 1;
 
-        gotoxy(28, 18);
+        gotoxy(28, 19);
         cout << "Enter a date (DD/MM/YYYY): ";
         cin >> date;
         
@@ -1140,7 +1142,7 @@ void menu()
             showStandings("Standing till the date ", date,"", 1);
         }
         else {
-            gotoxy(31, 20);
+            gotoxy(31, 22);
             cout << "Invalid date - Follow the pattern and try again";
             _getch();
             menu();

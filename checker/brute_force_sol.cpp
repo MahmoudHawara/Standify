@@ -46,7 +46,7 @@ class Team
             this->goalsFor       = gf;
             this->goalsAgainst   = ga;
             this->vis            = v;
-            this->pendingMatches=0;
+            this->pendingMatches = 0;
         }
 
         // Method to reset all the values of the team
@@ -60,7 +60,7 @@ class Team
             this->goalsFor       = 0;
             this->goalsAgainst   = 0;
             this->vis            = 0;
-            this->pendingMatches=0;
+            this->pendingMatches = 0;
         }
 
          // This is a boolean operator that compares two instances of the Team class
