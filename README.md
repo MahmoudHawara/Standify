@@ -20,6 +20,10 @@ A C++ program that generates league standings based on match results and can fil
     ./main
     ```
 
+## Demo 
+
+https://github.com/MahmoudHawara/Standify/assets/66095584/10294c45-0756-4779-ab4e-82d74f975e44
+
 ## Algorithms Used
 
 - Depth First Search `DFS`
@@ -65,11 +69,3 @@ Suppose the user opts to view the standings **up to a particular Date** and inpu
 ## Complexity
 
 In the preceding two sections, it was elucidated that the *time complexity is `O((n + m) * lg(m) * k)`* and the space complexity is *`O(m + n)`, where `m` is The number of matches and `n` is the number of teams and `k` is the number of quireies*.
-
-## Demo 
-
-https://github.com/MahmoudHawara/Standify/assets/66095584/10294c45-0756-4779-ab4e-82d74f975e44
-
-
-
-
