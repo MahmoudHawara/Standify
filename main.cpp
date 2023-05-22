@@ -16,7 +16,7 @@ using namespace std;
 int lastRound = 0, yp;
 map<string, int>nameToId;
 
-int main();
+void mainScreen();
 void menu();
 void openFileDialogue();
 bool headToHead(int , int);         // mid man function to link between Team class and League class
@@ -646,7 +646,7 @@ string checkCSVFormat(string filePath)   // O(m * lg(R)), where m is the number 
                 case 3: 
                     if(!isString(field)) // O(L)
                     {
-                        return "The team name should be a string";
+                        return "The team name should contain only latin letters";
                     }
                     break;
 
@@ -1014,7 +1014,7 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
     cin >> choice;
     
     int c = isInt(choice);  // O(L)
-    if(c < 1 || c > 6) menu();
+    if(c < 1 || c > 7) menu();
     
     if(c == 1)  // O(m + n * lg(n)), where n is the number of teams and m is the number of matches
     {    
@@ -1112,13 +1112,13 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
     }
     else 
     {
-        main();
+        mainScreen();
     }
 }
 
-int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
-{   
-    resizeConsole();
+void mainScreen() // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
+{
+    
     clearScreen();
 
     gotoxy(20, 10);
@@ -1129,6 +1129,13 @@ int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is
 
     openFileDialogue();   // O((n + m) * lg(m) * k)
 	_getch();
+}
 
+int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
+{   
+    
+    resizeConsole();
+    mainScreen();
+    
     return 0;
 }
