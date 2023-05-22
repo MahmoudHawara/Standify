@@ -25,7 +25,7 @@ bool headToHead(int , int);         // mid man function to link between Team cla
 void resizeConsole()
 {
     HWND console = GetConsoleWindow();
-    MoveWindow(console, 100, 0, 1090, 800, TRUE);
+    MoveWindow(console, 100, 0, 1230, 800, TRUE);
 }
 
 // this function to clear the console screen
@@ -98,26 +98,27 @@ class Team
         // Method to print the details of the team
         void print(int y, int c)    // O(1)
         {   
-
             gotoxy(5, y);
             cout << c;
             gotoxy(15, y);
             cout << this->Name;
             gotoxy(38, y);
             cout << this->matchesPlayed;
-            gotoxy(53, y);
+            gotoxy(58, y);
+            cout << this->pendingMatches;
+            gotoxy(75, y);
             cout << this->win;
-            gotoxy(62, y);
-            cout << this->lose;
-            gotoxy(72, y);
-            cout << this->draw;
             gotoxy(84, y);
+            cout << this->lose;
+            gotoxy(94, y);
+            cout << this->draw;
+            gotoxy(107, y);
             cout << this->goalsFor;
-            gotoxy(100, y);
+            gotoxy(123, y);
             cout << this->goalsAgainst;
-            gotoxy(120, y);
+            gotoxy(140, y);
             cout << max(this->goalsAgainst, this->goalsFor) - min(this->goalsAgainst, this->goalsFor);
-            gotoxy(136, y);
+            gotoxy(156, y);
             cout << this->points;
 
         }
@@ -955,35 +956,30 @@ void showStandings(string h, string x, string rEnd, bool r) // O(n * lg(n)), whe
     gotoxy(32, 9);
     cout << "Matches Played";
     gotoxy(52, 9);
+    cout << "Pending Matches";
+    gotoxy(74, 9);
     cout << "Won";
-    gotoxy(61, 9);
+    gotoxy(83, 9);
     cout << "Lost";
-    gotoxy(71, 9);
+    gotoxy(93, 9);
     cout << "Draw";
-    gotoxy(81, 9);
+    gotoxy(103, 9);
     cout << "Goals For";
-    gotoxy(95, 9);
+    gotoxy(117, 9);
     cout << "Goals Against";
-    gotoxy(116, 9);
+    gotoxy(135, 9);
     cout << "Goals Diff";
-    gotoxy(134, 9);
+    gotoxy(153, 9);
     cout << "Points";
 
-    bool ok = 0;
     if(r) {
-        ok = league_rounds.printStanding(11);   // O(n * lg(n))
+        league_rounds.printStanding(11);   // O(n * lg(n))
     }
     else {
-        ok = league_date.printStanding(11);     // O(n * lg(n))
+        league_date.printStanding(11);     // O(n * lg(n))
     }
 
-    if(ok)
-    {
-        gotoxy(58, yp + 3);
-        cout << "There are unplayed matches";
-        yp += 3;
-    }
-    gotoxy(60, yp + 3);
+    gotoxy(72, yp + 3);
     cout << "Press any key to back";
     
     _getch();
