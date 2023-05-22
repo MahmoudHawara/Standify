@@ -395,7 +395,7 @@ int main()
     filePath = "\"" + filePath + "\"";
 
     // set the path of checker directory 
-    chdir("");
+    chdir("D:\\hawara\\Projects\\Standify\\checker");
     
     run_programs(filePath);
 

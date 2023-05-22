@@ -593,7 +593,7 @@ bool isCSVFile(char* filename)  // O(L), where L is the Length of the string of 
 }
 
 // check if the CSV File is good or not
-string isGoodCSVFile(string filePath)   // O(m * lg(R)), where m is the number of matches and R is the number of rounds
+string checkCSVFormat(string filePath)   // O(m * lg(R)), where m is the number of matches and R is the number of rounds
 {   
     map<int, bool> rounds;
 
@@ -904,7 +904,7 @@ void openFileDialogue()  // O((n + m) * lg(m) * k), where m is The number of mat
                 // check if it is CSV File or not
                 if (isCSVFile(szFile))      // O(L), where L is the Length of the string of the file path
                 {   
-                    string msg = isGoodCSVFile(string(szFile)); // O(m), where m is the number of matches
+                    string msg = checkCSVFormat(string(szFile)); // O(m), where m is the number of matches
                     // check if it is good CSV file or not
                     if (msg == "")
                     {
@@ -994,7 +994,7 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
 {   
 
     clearScreen();
-
+    
     gotoxy(10, 5);
     cout << "<< Standify - Premier League's Standing >>";
     gotoxy(20, 8);
