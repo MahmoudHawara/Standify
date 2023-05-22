@@ -3,4 +3,7 @@
 *.exe
 
 test.cpp
+splash_screen.cpp
 
+graph_solution.csv
+brute_force_solution.csv
