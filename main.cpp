@@ -16,7 +16,7 @@ using namespace std;
 int lastRound = 0, yp;
 map<string, int>nameToId;
 
-int main();
+void mainScreen();
 void menu();
 void openFileDialogue();
 bool headToHead(int , int);         // mid man function to link between Team class and League class
@@ -291,7 +291,7 @@ class League
         }
 
         // Method to get the matches played for a interval rounds   
-        void DFS_Round(int homeID, int startRound, int endRound) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
+        void DFS_Round(int homeID, int startRound, int endRound) // O(n + m +  lg(m)), where m is The number of matches and n is the number of teams 
         {
             if(team[homeID].vis) return;
             team[homeID].vis = 1;
@@ -340,12 +340,12 @@ class League
             }
         }
        
-        void DFS_Round(int startround, int endRound) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
+        void DFS_Round(int startround, int endRound) // O(n + m + lg(m)), where m is The number of matches and n is the number of teams 
         {
             resetTeams();   // O(n)
-            for(int homeID = 0; homeID < team.size(); ++homeID) // O((n + m) * lg(m))
+            for(int homeID = 0; homeID < team.size(); ++homeID) // O(n + m + lg(m))
             {   
-                DFS_Round(homeID, startround, endRound); // O((n + m) * lg(m))
+                DFS_Round(homeID, startround, endRound); // O(n + m + lg(m))
             }
         }
 
@@ -646,7 +646,7 @@ string checkCSVFormat(string filePath)   // O(m * lg(R)), where m is the number 
                 case 3: 
                     if(!isString(field)) // O(L)
                     {
-                        return "The team name should be a string";
+                        return "The team name should contain only latin letters";
                     }
                     break;
 
@@ -986,7 +986,7 @@ void showStandings(string h, string x, string rEnd, bool r) // O(n * lg(n)), whe
     menu();
 }
 
-void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
+void menu()  //  O((m + n * lg(n)) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
 {   
 
     clearScreen();
@@ -1014,7 +1014,7 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
     cin >> choice;
     
     int c = isInt(choice);  // O(L)
-    if(c < 1 || c > 6) menu();
+    if(c < 1 || c > 7) menu();
     
     if(c == 1)  // O(m + n * lg(n)), where n is the number of teams and m is the number of matches
     {    
@@ -1037,14 +1037,14 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
             menu();
         }
 
-        if(c == 2) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
+        if(c == 2) // O(n + m + lg(m)), where m is The number of matches and n is the number of teams 
         {        
             // get the standing for the round 
-            league_rounds.DFS_Round(r, r); // O((n + m) * lg(m))
+            league_rounds.DFS_Round(r, r); // O(n + m + lg(m))
             // then show the standings
             showStandings("Standing for the round ", round, "", 0); // O(n * lg(n))
         }
-        else if(c == 3) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
+        else if(c == 3) // O(n + m + lg(m)), where m is The number of matches and n is the number of teams 
         {
             string round2;
 
@@ -1061,7 +1061,7 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
             }
             
             // get the standing for the round 
-            league_rounds.DFS_Round(r, r2);   // O((n + m) * lg(m))
+            league_rounds.DFS_Round(r, r2);   // O(n + m + lg(m))
             // then show the standings
             showStandings("Standing for rounds interval ", round, round2, 0); // O(n * lg(n))
         }
@@ -1112,13 +1112,13 @@ void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n i
     }
     else 
     {
-        main();
+        mainScreen();
     }
 }
 
-int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
-{   
-    resizeConsole();
+void mainScreen() // O((m + n * lg(n)) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
+{
+    
     clearScreen();
 
     gotoxy(20, 10);
@@ -1129,6 +1129,13 @@ int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is
 
     openFileDialogue();   // O((n + m) * lg(m) * k)
 	_getch();
+}
 
+int main()  // O((m + n * lg(n)) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
+{   
+    
+    resizeConsole();
+    mainScreen();
+    
     return 0;
 }

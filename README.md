@@ -20,6 +20,10 @@ A C++ program that generates league standings based on match results and can fil
     ./main
     ```
 
+## Demo 
+
+https://github.com/MahmoudHawara/Standify/assets/66095584/10294c45-0756-4779-ab4e-82d74f975e44
+
 ## Algorithms Used
 
 - Depth First Search `DFS`
@@ -56,7 +60,7 @@ Suppose the user opts to view the standings **up to a particular Round** and inp
 
 In case the user chooses to display rounds within a **specific range** and inputs the start and end round values, the program will make use of the `DFS_round` function. To begin with, this function will utilize the `getFirst()` function, which involves a `binary search` algorithm, to locate the first match that falls within the specified range. After that, the function will traverse only those matches whose rounds fall within the given range, similar to the approach utilized in the pre-section.
 
-***The Time Complexity for this Section: `O((n + m) * lg(m))`, where m is The number of matches and n is the number of teams.***
+***The Time Complexity for this Section: `O(n + m + lg(m))`, where m is The number of matches and n is the number of teams.***
 
 Suppose the user opts to view the standings **up to a particular Date** and inputs that date. In that case, the program will leverage the `DFS_date` function to traverse the matches of every team in the **teamSchedule** vector within the **League** class whose round is less than or equal to the given date. Afterward, the `team` vector will be sorted, and the `showStanding` function will be used to display the standings until the chosen round.
 
@@ -64,4 +68,8 @@ Suppose the user opts to view the standings **up to a particular Date** and inpu
 
 ## Complexity
 
-In the preceding two sections, it was elucidated that the *time complexity is `O((n + m) * lg(m) * k)`* and the space complexity is *`O(m + n)`, where `m` is The number of matches and `n` is the number of teams and `k` is the number of quireies*.
+In the preceding two sections, it was elucidated that the *time complexity is ` O((m + n * lg(n)) * k)`* and the space complexity is *`O(m + n)`, where `m` is The number of matches and `n` is the number of teams and `k` is the number of quireies*.
+
+## Checker
+
+Save time and resources by using our automated checker to quickly validate your program outputs. Our tool ensures your outputs meet specific requirements, allowing you to focus on delivering high-quality results. for more info go to [Checker](https://github.com/MahmoudHawara/Standify/tree/main/checker).
