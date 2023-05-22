@@ -223,11 +223,11 @@ class League
                 if(match.round > roundNum) return;
 
 
-                team[homeID].matchesPlayed++;
+                team[homeID].matchesPlayed += (match.winner != '-');
                 team[homeID].goalsFor += match.goalsForHome;
                 team[homeID].goalsAgainst += match.goalsForAway;
                 
-                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].matchesPlayed += (match.winner != '-');
                 team[match.awayTeamId].goalsFor += match.goalsForAway;
                 team[match.awayTeamId].goalsAgainst += match.goalsForHome;
 

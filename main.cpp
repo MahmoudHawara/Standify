@@ -65,6 +65,7 @@ class Team
         int pendingMatches;
 
         // Constructor to initialize the object
+        // O(1)
         Team(string name, int id, int mp = 0, int p = 0, int w = 0, int l = 0, int d = 0, int gf = 0, int ga = 0, bool v = 0, int pm = 0)
         {
             this->Name           = name;
@@ -81,7 +82,7 @@ class Team
         }
 
         // Method to reset all the values of the team
-        void reset()
+        void reset()    // O(1)
         {
             this->matchesPlayed  = 0;
             this->points         = 0;
@@ -95,7 +96,7 @@ class Team
         }
 
         // Method to print the details of the team
-        void print(int y, int c)
+        void print(int y, int c)    // O(1)
         {   
 
             gotoxy(5, y);
@@ -122,7 +123,7 @@ class Team
         }
 
         // This is a boolean operator that compares two instances of the Team class
-        bool operator<(const Team& other)
+        bool operator<(const Team& other)   // amortized to be O(1) but in worest Case it will be O(m), where m is the number of matches
         {
             // If the points of this team are not equal to the points of the other team
             if (this->points != other.points)
@@ -147,7 +148,7 @@ class Team
             
             // If none of the above conditions are met, call the headToHead function
             // to determine the order of the teams based on their head-to-head record
-            return headToHead(this->Id, other.Id);
+            return headToHead(this->Id, other.Id);  // O(m)
         }
 
 };
@@ -169,7 +170,7 @@ class Match
         char winner;            // d = Draw, h = Home, a = Away
 
         // Constructor to initialize the object
-        Match(int hId, int aId, int r, int d, int m, int y, int gh, int ga, char w)
+        Match(int hId, int aId, int r, int d, int m, int y, int gh, int ga, char w) // O(1)
         {
             this->homeTeamId    = hId;
             this->awayTeamId    = aId;
@@ -183,13 +184,13 @@ class Match
         }
 
         // Overloaded operator < to sort matches based on their round number in ascending order
-        bool operator<(const Match& other)
+        bool operator<(const Match& other)  // O(1)
         {
             return this->round < other.round;
         }
 
         // Static method to compare two matches based on their date
-        static bool compare(const Match& a, const Match& b) 
+        static bool compare(const Match& a, const Match& b)    // O(1)
         {
             if (a.year != b.year)
             {
@@ -205,6 +206,7 @@ class Match
             }
         }
 
+        // for testing and it is in O(1)
         void print()
         {
             cout << this->round << ", ";
@@ -227,11 +229,11 @@ class League
         League(){}
 
         // Method to reset all the teams
-        void resetTeams()
+        void resetTeams()   // O(n), where n is the number of teams
         {
-            for (int i = 0; i < team.size(); i++)
+            for (int i = 0; i < team.size(); i++)   // O(n)
             {
-                team[i].reset();
+                team[i].reset();   // O(1)
             }
         }
 
@@ -240,7 +242,7 @@ class League
         // homeId - id of the home team
         // awayId - id of the away team
         // match  - Match object representing the match
-        void addMatch(int homeId, int awayId, Match match)
+        void addMatch(int homeId, int awayId, Match match) // O(1)
         {
             // Check if both teams exist in the schedule
             if (max(homeId, awayId) >= (int)team.size())
@@ -257,76 +259,21 @@ class League
             }
 
             // Add the match to the home team's schedule
-            this->teamSchedule[homeId].push_back(match);
+            this->teamSchedule[homeId].push_back(match);    // O(1)
 
         }
 
         // Method to add a new team to the team schedule.
-        void addTeam()
+        void addTeam()  // O(1)
         {
             // The push_back() function adds an empty vector to the end of the teamSchedule vector.
-            teamSchedule.push_back({});
-        }
-
-        // Method to perform DFS on the rounds
-        void DFS_Rounds(int homeID, int roundNum)
-        {
-            if (team[homeID].vis)return;
-
-            team[homeID].vis = 1;
-            
-            for(auto match: teamSchedule[homeID]) 
-            {
-                if(match.round > roundNum) return;
-
-
-                team[homeID].matchesPlayed++;
-                team[homeID].goalsFor += match.goalsForHome;
-                team[homeID].goalsAgainst += match.goalsForAway;
-                
-                team[match.awayTeamId].matchesPlayed++;
-                team[match.awayTeamId].goalsFor += match.goalsForAway;
-                team[match.awayTeamId].goalsAgainst += match.goalsForHome;
-
-                if(match.winner == 'D') 
-                {
-                    team[homeID].points++;
-                    team[match.awayTeamId].points++;
-                    team[homeID].draw++;
-                    team[match.awayTeamId].draw++;
-                }
-                else if(match.winner == 'H') 
-                {
-                    team[homeID].points += 3;
-                    team[homeID].win++;
-                    team[match.awayTeamId].lose++;
-                }
-                else if(match.winner == 'A')
-                {
-                    team[homeID].lose++;
-                    team[match.awayTeamId].points += 3;
-                    team[match.awayTeamId].win++;
-                }
-                else{
-                    team[homeID].pendingMatches++;
-                    team[match.awayTeamId].pendingMatches++;
-                }
-
-                DFS_Rounds(match.awayTeamId, roundNum);
-            }
-        }
-        void DFS_Rounds(int roundNum)
-        {
-            resetTeams();
-            for (int homeID = 0; homeID < team.size(); homeID++)
-            {
-                DFS_Rounds(homeID, roundNum);
-            }
+            teamSchedule.push_back({}); // O(1)
         }
 
         // Method to get the first match played in a given round for each team
-        int getFirst(int homeID, int roundNum) 
+        int getFirst(int homeID, int startround)    // O(lg(m)), where m is The number of matches
         {
+            if (startround == 1)return 0;   // if i need all rounds and till rounds to remove the factor lg(m) of the BS
             int cnt = (int)teamSchedule[homeID].size();
             int l = 0, r = cnt - 1;
 
@@ -335,32 +282,32 @@ class League
                 int match_idx = (l + r) / 2;
                 auto match = teamSchedule[homeID][match_idx];
 
-                if(match.round < roundNum) l = match_idx + 1;
+                if(match.round < startround) l = match_idx + 1;
                 else r = match_idx; 
             }
 
             return l;
         }
 
-        // Method to get the matches played for a given round     
-        void DFS_Round(int homeID, int roundNum, int endRound) 
+        // Method to get the matches played for a interval rounds   
+        void DFS_Round(int homeID, int startRound, int endRound) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
         {
             if(team[homeID].vis) return;
             team[homeID].vis = 1;
             
-            int match_idx = getFirst(homeID, roundNum);
+            int match_idx = getFirst(homeID, startRound);   // O(lg(m)
 
             for(; match_idx < teamSchedule[homeID].size(); ++match_idx)
             {
                 auto match = teamSchedule[homeID][match_idx];
                 
                 if(match.round > endRound) return;
-		if(match.round < roundNum)continue;
-                team[homeID].matchesPlayed++;
+		        if(match.round < startRound)continue;
+                team[homeID].matchesPlayed += match.winner != '-';
                 team[homeID].goalsFor += match.goalsForHome;
                 team[homeID].goalsAgainst += match.goalsForAway;
                 
-                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].matchesPlayed += match.winner != '-';
                 team[match.awayTeamId].goalsFor += match.goalsForAway;
                 team[match.awayTeamId].goalsAgainst += match.goalsForHome;
 
@@ -388,19 +335,20 @@ class League
                     team[match.awayTeamId].pendingMatches++;
                 }
 
-                DFS_Round(match.awayTeamId, roundNum, endRound);
+                DFS_Round(match.awayTeamId, startRound, endRound);
             }
         }
-        void DFS_Round(int roundNum, int endRound) 
+       
+        void DFS_Round(int startround, int endRound) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
         {
-            resetTeams();
-            for(int homeID = 0; homeID < team.size(); ++homeID)  
+            resetTeams();   // O(n)
+            for(int homeID = 0; homeID < team.size(); ++homeID) // O((n + m) * lg(m))
             {   
-                DFS_Round(homeID, roundNum, endRound); 
+                DFS_Round(homeID, startround, endRound); // O((n + m) * lg(m))
             }
         }
 
-        bool date_compare(int day1, int day2, int year1, int year2, int mon1, int mon2)
+        bool date_compare(int day1, int day2, int year1, int year2, int mon1, int mon2) // O(1)
         {
             if(year1 > year2) return 1;
             if(year1 == year2 && mon1 > mon2) return 1;
@@ -409,7 +357,7 @@ class League
         }
 
         // Method to perform DFS on the dates
-        void DFS_Date(int homeID, int day, int year, int month)
+        void DFS_Date(int homeID, int day, int year, int month) // O(n + m), where m is The number of matches and n is the number of teams 
         {
             if(team[homeID].vis) return;
             
@@ -419,11 +367,11 @@ class League
             {
                 if(date_compare(match.day, day, match.year, year, match.month, month)) return;
 
-                team[homeID].matchesPlayed++;
+                team[homeID].matchesPlayed += match.winner != '-';
                 team[homeID].goalsFor += match.goalsForHome;
                 team[homeID].goalsAgainst += match.goalsForAway;
 
-                team[match.awayTeamId].matchesPlayed++;
+                team[match.awayTeamId].matchesPlayed += match.winner != '-';
                 team[match.awayTeamId].goalsAgainst += match.goalsForHome;
                 team[match.awayTeamId].goalsFor += match.goalsForAway;
 
@@ -454,45 +402,51 @@ class League
                 DFS_Date(match.awayTeamId, day, year, month);
             }
         }
-        void DFS_Date(int day, int year, int month)
+    
+        void DFS_Date(int day, int year, int month) // O(n + m), where m is The number of matches and n is the number of teams 
         {
-            resetTeams();
-            for (int homeID = 0; homeID < team.size(); homeID++)
+            resetTeams();   // O(n)
+            for (int homeID = 0; homeID < team.size(); homeID++) // O(n + m)
             {
-               DFS_Date(homeID, day, year, month);
+               DFS_Date(homeID, day, year, month);  // O(n + m)
             }
         }
 
         // Method to sort the matches based on rounds
-        void sortMatchesBasedOnRounds()
+        void sortMatchesBasedOnRounds() // O(m * lg(m)), where m is the number of matches
         {
+            // O(m_1 * lg(m_1) + m_2 * lg(m_2) + m_3 * lg(m_3) + ....... + m_n * lg(m_n)), where n is the number of teams
+            // ~= O(m * lg(m)), where m is the number of matches
             for (int i = 0; i < this->teamSchedule.size(); i++)
             {
-                sort(teamSchedule[i].begin(), teamSchedule[i].end());
+                sort(teamSchedule[i].begin(), teamSchedule[i].end());   // O(m_i * lg(m_i)), where m_i is the number of matches pre team i
             }
         }
 
         // Method to sort the matches based on date
-        void sortMatchesBasedOnDate()
+        void sortMatchesBasedOnDate() // O(m * lg(m)), where m is the number of matches
         {
+            // O(m_1 * lg(m_1) + m_2 * lg(m_2) + m_3 * lg(m_3) + ....... + m_n * lg(m_n)), where n is the number of teams
+            // ~= O(m * lg(m)), where m is the number of matches
             for (int i = 0; i < this->teamSchedule.size(); i++)
             {
-                sort(teamSchedule[i].begin(), teamSchedule[i].end(), Match::compare);
+                sort(teamSchedule[i].begin(), teamSchedule[i].end(), Match::compare);  // O(m_i * lg(m_i)), where m_i is the number of matches pre team i
             }
         }
 
         // Method to sort the teams based on their standing
-        void sortTeams(vector<Team>& team)
+        void sortTeams(vector<Team>& team) // O(n * lg(n)), where n is the number of teams
         {
             // Sort the teams
-            sort(team.begin(), team.end());
+            sort(team.begin(), team.end()); 
         }
 
+        // for testing and its time comolexity is O(n * m), where n is the number of teams and m is the number of matches
         void print()
         {
-            for (int i = 0; i < teamSchedule.size(); i++)
+            for (int i = 0; i < teamSchedule.size(); i++)   // O(n)
             {
-                for (int j = 0; j < teamSchedule[i].size(); j++)
+                for (int j = 0; j < teamSchedule[i].size(); j++)    // O(m)
                 {
                     cout << team[i].Name << ' ' << team[this->teamSchedule[i][j].awayTeamId].Name << ' ' << this->teamSchedule[i][j].round << '\n';
                 }
@@ -501,20 +455,20 @@ class League
         }
 
         // Method to print the standing of the teams
-        bool printStanding(int y)
+        bool printStanding(int y)   // O(n * lg(n)), where n is the number of teams
         {
 
             bool ret = 0;
-            teamToPrint = team;
+            teamToPrint = team; // O(n)
 
             // First, sort the teams
-            sortTeams(teamToPrint);
+            sortTeams(teamToPrint); // O(n * lg(n))
 
             // Print the standing of each team
-            for (int i = 0; i < teamToPrint.size(); i++)
+            for (int i = 0; i < teamToPrint.size(); i++)    // O(n)
             {
-                teamToPrint[i].print(y, i + 1);
-                if(teamToPrint[i].pendingMatches) ret = 1;
+                teamToPrint[i].print(y, i + 1); // O(1)
+                if(teamToPrint[i].pendingMatches) ret = 1;  // O(1)
                 y++;
             }
             yp = y;
@@ -522,13 +476,13 @@ class League
         }
 
         // A function that determines head-to-head ranking between two teams.
-        bool headToHead(int teamId1, int teamId2)
+        bool headToHead(int teamId1, int teamId2)   // O(m), where m is the number of matches
         {
             // Initialize variables to keep track of wins and goal differences for both teams.
             int team1Wins = 0, team1DiffGoals = 0, team2Wins = 0, team2DiffGoals = 0;
 
             // Loop through the matches of the first team against the second team.
-            for (int match = 0; match < teamSchedule[teamId1].size(); match++)
+            for (int match = 0; match < teamSchedule[teamId1].size(); match++) // O(m_teamId1)
             {
                 // If the away team is not the second team, skip this iteration.
                 if (teamSchedule[teamId1][match].awayTeamId != teamId2) continue;
@@ -542,7 +496,7 @@ class League
             }
 
             // Loop through the matches of the second team against the first team.
-            for (int match = 0; match < teamSchedule[teamId2].size(); match++)
+            for (int match = 0; match < teamSchedule[teamId2].size(); match++)  // O(teamId2)
             {
                 // If the away team is not the first team, skip this iteration.
                 if (teamSchedule[teamId2][match].awayTeamId != teamId1) continue;
@@ -563,7 +517,7 @@ class League
         }
 
         // This function resets the team schedule by clearing all game assignments for each team
-        void reset()
+        void reset()  // O(n + m), where m is The number of matches and n is the number of teams 
         {
             teamSchedule.clear();
         }
@@ -573,19 +527,19 @@ League league_rounds;
 League league_date;
 
 // this function as a mid man between the Team class and League class
-bool headToHead(int teamId1 , int teamId2)
+bool headToHead(int teamId1 , int teamId2)  // O(m), where m is the number of matches
 {
     return league_rounds.headToHead(teamId1, teamId2);
 }
 
 // This function converts a string representation of a number to a long long integer
-long long strToInt(string number)
+long long strToInt(string number)   // O(L), where L is the string length
 {
     // We start with a value of 0
     long long ret = 0;
     
     // For each character in the string, we multiply our current value by 10 and add the digit
-    for (int i = 0; number[i]; i++)
+    for (int i = 0; number[i]; i++) // O(L)
     {
         ret *= 10;
         ret += (number[i] - '0');
@@ -596,19 +550,19 @@ long long strToInt(string number)
 }
 
 // check if the input is integer
-long long isInt(string x) 
+long long isInt(string x)   // O(L), where L is the number length
 {
-    for(int i = 0; i < x.length(); ++i) 
+    for(int i = 0; i < x.length(); ++i)     // O(L)
     {
         if(!isdigit(x[i])) return -1;
     }
-    return strToInt(x);
+    return strToInt(x); // O(L)
 }
 
 // check if the input is string
-bool isString(string x) 
+bool isString(string x)  // O(L), where L is the number length
 {
-    for(int i = 0; i < x.length(); ++i) 
+    for(int i = 0; i < x.length(); ++i)   // O(L)
     {
         if(isdigit(x[i])) return 0;
     }
@@ -616,13 +570,14 @@ bool isString(string x)
 }
 
 // check if the date follows the pattern
-bool isValidDate(string date) {
+bool isValidDate(string date) // O(L), where L is the number length
+{
     regex pattern("\\d{2}[/||-]\\d{2}[/||-]\\d{4}");
     return regex_match(date, pattern);
 }
 
 // check if the file is CSV file or not
-bool isCSVFile(char* filename) 
+bool isCSVFile(char* filename)  // O(L), where L is the Length of the string of the file path
 {
     // Get the position of the last dot in the filename
     size_t len = strlen(filename);
@@ -638,7 +593,7 @@ bool isCSVFile(char* filename)
 }
 
 // check if the CSV File is good or not
-string isGoodCSVFile(string filePath)
+string isGoodCSVFile(string filePath)   // O(m * lg(R)), where m is the number of matches and R is the number of rounds
 {   
     map<int, bool> rounds;
 
@@ -663,24 +618,24 @@ string isGoodCSVFile(string filePath)
         istringstream ss(line), sss;
 
         // Extract each field of the current line using comma as the delimiter
-        while (getline(ss, field, ',')) 
+        while (getline(ss, field, ','))     // O(m * lg(R))
         {   
             // Use a switch statement to determine which field we are currently processing
             switch (i)
             { 
                 case 0:
-                    round = isInt(field);
+                    round = isInt(field);   // O(L)
                     if(round == -1) 
                     {
                         return "The round number should be an integer";
                     }
                     
                     lastRound = max(lastRound, round);
-                    rounds[round] = 1;
+                    rounds[round] = 1; // O(lg(R)) 
                     break;
 
                 case 1: 
-                    if(!isValidDate(field)) 
+                    if(!isValidDate(field)) // O(L)
                     {
                         return "The date should follow the format (DD/MM/YYYY)";
                     }
@@ -688,7 +643,7 @@ string isGoodCSVFile(string filePath)
 
                 case 2: 
                 case 3: 
-                    if(!isString(field)) 
+                    if(!isString(field)) // O(L)
                     {
                         return "The team name should be a string";
                     }
@@ -765,23 +720,23 @@ string isGoodCSVFile(string filePath)
 }
 
 // This function creates a new team with the given name and adds it to the league
-void createNewTeam(string teamName)
+void createNewTeam(string teamName) // O(lg(n)), where n is the number of teams
 {
     // First, we get the current number of teams, which will be the new team's ID
-    int teamId = (int)team.size();
+    int teamId = (int)team.size();  // O(1)
     
     // Next, we add a mapping from the team name to the team ID in the nameToId map
-    nameToId[teamName] = teamId;
+    nameToId[teamName] = teamId;    // O(lg(n))
     
     // Then, we create a new Team object with the given name and ID, and add it to the team vector
-    team.push_back(Team(teamName, teamId));
+    team.push_back(Team(teamName, teamId)); // O(1)
     
     // Finally, we inform the league that a new team has been added
-    league_rounds.addTeam();
+    league_rounds.addTeam();    // O(1)
 }
 
 // This function reads league match data from a file specified by the filePath parameter
-void implementTheLeagueFromFile(string filePath)
+void implementTheLeagueFromFile(string filePath)    // O(m * lg(n)), where m is the number of matches and n is the number of teams
 {
     // Open the input file
     ifstream inputFile(filePath);
@@ -804,13 +759,13 @@ void implementTheLeagueFromFile(string filePath)
         istringstream ss(line), sss;
 
         // Extract each field of the current line using comma as the delimiter
-        while (getline(ss, field, ',')) 
+        while (getline(ss, field, ','))     // O(m)
         {
             // Use a switch statement to determine which field we are currently processing
             switch (i)
             {
                 case 0:
-                    round = strToInt(field);
+                    round = strToInt(field);    // O(L)
                     lastRound = max(lastRound, round);
                     break;
 
@@ -823,7 +778,7 @@ void implementTheLeagueFromFile(string filePath)
                     // If the home team is not already in the map, create a new team and add it to the map
                     if (nameToId.find(field) == nameToId.end())
                     {
-                        createNewTeam(field);
+                        createNewTeam(field);   // O(lg(n))
                     }
                     homeTeamId = nameToId[field];
                     break;
@@ -832,7 +787,7 @@ void implementTheLeagueFromFile(string filePath)
                     // If the away team is not already in the map, create a new team and add it to the map
                     if (nameToId.find(field) == nameToId.end())
                     {
-                        createNewTeam(field);
+                        createNewTeam(field);// o(lg(n))
                     }
                     awayTeamId = nameToId[field];
                     break;
@@ -840,13 +795,13 @@ void implementTheLeagueFromFile(string filePath)
                 case 4: 
                     // If the goals for home team field is '-', set it to '0'
                     if (field[0] == '-')field[0] = '0';
-                    goalsForHome = strToInt(field);
+                    goalsForHome = strToInt(field); // O(L)
                     break;
 
                 case 5: 
                     // If the goals for away team field is '-', set it to '0'
                     if (field[0] == '-')field[0] = '0';
-                    goalsForAway = strToInt(field);
+                    goalsForAway = strToInt(field); // O(L)
                     break;
 
                 case 6:
@@ -862,13 +817,13 @@ void implementTheLeagueFromFile(string filePath)
 
         // Create a Match object using the extracted match data
         Match match(homeTeamId, awayTeamId, round, day, month, year,
-                    goalsForHome, goalsForAway, winner);
+                    goalsForHome, goalsForAway, winner);    // O(1)
 
         // Print the match details (for testing purposes)
         // match.print();
 
         // Add the match to the league_rounds and league_date objects
-        league_rounds.addMatch(homeTeamId, awayTeamId, match);
+        league_rounds.addMatch(homeTeamId, awayTeamId, match); // O(1)
     }
 
     // Set league_date to be a copy of league_rounds
@@ -889,25 +844,25 @@ void implementTheLeagueFromFile(string filePath)
 }
 
 // This function resets all league data by clearing various data structures and resetting league-wide stats
-void resetAll()
+void resetAll()    // O(n + m), where m is The number of matches and n is the number of teams 
 {
     // Clear the team vector, which contains information about each team in the league
-    team.clear();
+    team.clear(); // O(n)
     
     // Reset the league-rounds data structure, which tracks various stats for the league over time
-    league_rounds.reset();
+    league_rounds.reset();  // O(n + m)
     
     // Reset the league-date data structure, which may track different stats than league-rounds based on dates
-    league_date.reset();
+    league_date.reset();    // O(n + m)
     
     // Clear the nameToId map, which maps team names to their corresponding IDs
-    nameToId.clear();
+    nameToId.clear();   // O(n)
 }
 
-void openFileDialogue()
+void openFileDialogue()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
 {   
 
-    resetAll();
+    resetAll();     // O(n + m)
 
     clearScreen();
 	gotoxy(10, 5);
@@ -947,16 +902,16 @@ void openFileDialogue()
             if (GetOpenFileName(&ofn)==TRUE) 
             {
                 // check if it is CSV File or not
-                if (isCSVFile(szFile)) 
+                if (isCSVFile(szFile))      // O(L), where L is the Length of the string of the file path
                 {   
-                    string msg = isGoodCSVFile(string(szFile));
+                    string msg = isGoodCSVFile(string(szFile)); // O(m), where m is the number of matches
                     // check if it is good CSV file or not
                     if (msg == "")
                     {
                         // The File is Good so take it and go ahead
                         lastRound = 0;
-                        implementTheLeagueFromFile(string(szFile));
-                        menu();
+                        implementTheLeagueFromFile(string(szFile)); // O(m), where m is the number of matches
+                        menu();   // O((n + m) * lg(m) * k)
                         return;
                     }
                     else 
@@ -983,7 +938,7 @@ void openFileDialogue()
     }
 }
 
-void showStandings(string h, string x, string rEnd, bool r) 
+void showStandings(string h, string x, string rEnd, bool r) // O(n * lg(n)), where n is the number of teams
 {
     clearScreen();
 
@@ -1016,10 +971,10 @@ void showStandings(string h, string x, string rEnd, bool r)
 
     bool ok = 0;
     if(r) {
-        ok = league_rounds.printStanding(11);
+        ok = league_rounds.printStanding(11);   // O(n * lg(n))
     }
     else {
-        ok = league_date.printStanding(11);
+        ok = league_date.printStanding(11);     // O(n * lg(n))
     }
 
     if(ok)
@@ -1035,7 +990,7 @@ void showStandings(string h, string x, string rEnd, bool r)
     menu();
 }
 
-void menu() 
+void menu()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
 {   
 
     clearScreen();
@@ -1062,12 +1017,13 @@ void menu()
     cout << "Enter your choice: ";
     cin >> choice;
     
-    int c = isInt(choice);
+    int c = isInt(choice);  // O(L)
     if(c < 1 || c > 6) menu();
     
-    if(c == 1) {
-        league_rounds.DFS_Rounds(lastRound);
-        showStandings("Full standing for league", "", "", 0);
+    if(c == 1)  // O(m + n * lg(n)), where n is the number of teams and m is the number of matches
+    {    
+        league_rounds.DFS_Round(1, lastRound); // O(n + m)
+        showStandings("Full standing for league", "", "", 0);   // O(n * lg(n))
     }
     else if(c < 5) {
         string round;
@@ -1077,7 +1033,7 @@ void menu()
         else cout << "Enter start round number: ";
         cin >> round;
 
-        int r = isInt(round);
+        int r = isInt(round);   // O(L)
         if(r < 1 || r > lastRound) {
             gotoxy(31, 22);
             cout << "Invalid round number, the number of rounds equals " << lastRound;
@@ -1085,13 +1041,14 @@ void menu()
             menu();
         }
 
-        if(c == 2) {        
+        if(c == 2) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
+        {        
             // get the standing for the round 
-            league_rounds.DFS_Round(r, r);
+            league_rounds.DFS_Round(r, r); // O((n + m) * lg(m))
             // then show the standings
-            showStandings("Standing for the round ", round, "", 0);
+            showStandings("Standing for the round ", round, "", 0); // O(n * lg(n))
         }
-        else if(c == 3)
+        else if(c == 3) // O((n + m) * lg(m)), where m is The number of matches and n is the number of teams 
         {
             string round2;
 
@@ -1099,7 +1056,7 @@ void menu()
             cout << "Enter end round number: ";
             cin >> round2;
 
-            int r2 = isInt(round2);
+            int r2 = isInt(round2); // O(L)
             if(r2 < r || r2 > lastRound) {
                 gotoxy(31, 23);
                 cout << "The end round number must be between the given start " << r << " and " << lastRound;
@@ -1108,18 +1065,20 @@ void menu()
             }
             
             // get the standing for the round 
-            league_rounds.DFS_Round(r, r2);
+            league_rounds.DFS_Round(r, r2);   // O((n + m) * lg(m))
             // then show the standings
-            showStandings("Standing for rounds interval ", round, round2, 0);
+            showStandings("Standing for rounds interval ", round, round2, 0); // O(n * lg(n))
         }
-        else {              
+        else  // O(m + n * lg(n)), where n is the number of teams and m is the number of matches
+        {              
             // get the standing till the round 
-            league_rounds.DFS_Rounds(r);   
+            league_rounds.DFS_Round(1, r);    // O(n + m)
             // then show the standings
-            showStandings("Standing till round ", round, "", 0);
+            showStandings("Standing till round ", round, "", 0); // O(n * lg(n))
         }
     }
-    else if(c == 5) {
+    else if(c == 5) // O(m + n * lg(n)), where n is the number of teams and m is the number of matches
+    {
         string date;
         int day, month, year = 0, f = 1;
 
@@ -1127,36 +1086,41 @@ void menu()
         cout << "Enter a date (DD/MM/YYYY): ";
         cin >> date;
         
-        if(isValidDate(date)) {
+        if(isValidDate(date))   // O(m + n * lg(n))
+         {
             day = (date[0] - '0' != 0) * 10 + (date[1] - '0'); 
             month = (date[3] - '0' != 0) * 10 + (date[4] - '0'); 
-            for(int i = 9; i > 5; --i) {
+            for(int i = 9; i > 5; --i)  // O(1)
+            {
                 year += (date[i] - '0') * f;
                 f *= 10;
             }        
 
             // get the standings till the date
-            league_date.DFS_Date(0, day, year, month); 
+            league_date.DFS_Date(day, year, month); // O(n + m)
 
             // then show the standings
-            showStandings("Standing till the date ", date,"", 1);
+            showStandings("Standing till the date ", date,"", 1); // O(n * lg(n))
         }
-        else {
+        else 
+        {
             gotoxy(31, 22);
             cout << "Invalid date - Follow the pattern and try again";
             _getch();
             menu();
         }
     }
-    else if(c == 6) {
+    else if(c == 6)
+    {
         openFileDialogue();
     }
-    else {
+    else 
+    {
         main();
     }
 }
 
-int main() 
+int main()  // O((n + m) * lg(m) * k), where m is The number of matches and n is the number of teams and k is the number of quireies
 {   
     resizeConsole();
     clearScreen();
@@ -1167,7 +1131,7 @@ int main()
 	cout << "Press any key to continue";
 	_getch();
 
-    openFileDialogue();
+    openFileDialogue();   // O((n + m) * lg(m) * k)
 	_getch();
 
     return 0;

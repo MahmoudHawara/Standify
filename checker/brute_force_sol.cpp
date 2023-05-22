@@ -327,11 +327,11 @@ void solve(int roundNum)
     {   
         if(match.round > roundNum) continue; 
 
-        team[match.homeTeamId].matchesPlayed++;
+        team[match.homeTeamId].matchesPlayed += (match.winner != '-');
         team[match.homeTeamId].goalsFor += match.goalsForHome;
         team[match.homeTeamId].goalsAgainst += match.goalsForAway;
         
-        team[match.awayTeamId].matchesPlayed++;
+        team[match.awayTeamId].matchesPlayed += (match.winner != '-');
         team[match.awayTeamId].goalsFor += match.goalsForAway;
         team[match.awayTeamId].goalsAgainst += match.goalsForHome;
 
